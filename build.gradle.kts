@@ -1,4 +1,6 @@
 import java.net.URL
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 plugins {
     java
@@ -12,12 +14,12 @@ java {
 sourceSets {
     main {
         java.srcDirs("src")
-        java.destinationDirectory.set(file("$buildDir/classes"))
+        java.destinationDirectory.set(buildDir.resolve("classes"))
     }
 
     test {
         java.srcDirs("test")
-        java.destinationDirectory.set(file("$buildDir/tests"))
+        java.destinationDirectory.set(buildDir.resolve("tests"))
     }
 }
 
@@ -68,11 +70,9 @@ task("checkForUpdates") {
     description = "Checks for Battlecode updates."
 
     doLast {
-        val currentVersion = battlecodeVersion
-        val latestVersion = get(battlecodeVersionUrl)
-
-        if (currentVersion != latestVersion) {
-            print("\n\n\nBATTLECODE UPDATE AVAILABLE ($currentVersion -> $latestVersion)\n\n\n")
+        val latestBattlecodeVersion = get(battlecodeVersionUrl)
+        if (battlecodeVersion != latestBattlecodeVersion) {
+            print("\n\n\nBATTLECODE UPDATE AVAILABLE ($battlecodeVersion -> $latestBattlecodeVersion)\n\n\n")
         }
 
         if (file(examplefuncsplayerPath).readText().trim() != get(examplefuncsplayerUrl)) {
@@ -86,19 +86,16 @@ task("update") {
     description = "Updates to the latest Battlecode version."
 
     doLast {
-        val currentVersion = battlecodeVersion
-        val latestVersion = get(battlecodeVersionUrl)
-
-        if (currentVersion == latestVersion) {
-            println("Already using the latest Battlecode version ($currentVersion)")
+        val latestBattlecodeVersion = get(battlecodeVersionUrl)
+        if (battlecodeVersion == latestBattlecodeVersion) {
+            println("Already using the latest Battlecode version ($battlecodeVersion)")
         } else {
-            file("version.txt").writeText(latestVersion + "\n")
-            println("Updated Battlecode from $currentVersion to $latestVersion, please reload the Gradle project")
+            file("version.txt").writeText(latestBattlecodeVersion + "\n")
+            println("Updated Battlecode from $battlecodeVersion to $latestBattlecodeVersion, please reload the Gradle project")
         }
 
         val currentExamplefuncsplayer = file(examplefuncsplayerPath).readText().trim()
         val latestExamplefuncsplayer = get(examplefuncsplayerUrl)
-
         if (currentExamplefuncsplayer == latestExamplefuncsplayer) {
             println("Already using the latest examplefuncsplayer")
         } else {
@@ -237,4 +234,22 @@ task("listMaps") {
             println(map)
         }
     }
+}
+
+task<Zip>("createSubmission") {
+    group = "battlecode"
+    description = "Creates a submission zip."
+
+    dependsOn("build")
+
+    from(file("src").absolutePath)
+    include("camel_case/**/*")
+    archiveBaseName.set(DateTimeFormatter.ofPattern("yyyy-MM-dd_kk-mm-ss").format(LocalDateTime.now()))
+    destinationDirectory.set(project.buildDir.resolve("submissions"))
+}
+
+tasks.named("build") {
+    group = "battlecode"
+
+    dependsOn("unpackClient")
 }

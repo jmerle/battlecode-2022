@@ -1,6 +1,7 @@
 package camel_case.robot.droid;
 
 import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 
@@ -12,5 +13,7 @@ public class Soldier extends Droid {
     @Override
     public void run() throws GameActionException {
         super.run();
+
+        tryMoveTo(new MapLocation(0, 0));
     }
 }

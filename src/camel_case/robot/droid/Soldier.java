@@ -4,10 +4,11 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
+import camel_case.dijkstra.Dijkstra20;
 
 public class Soldier extends Droid {
     public Soldier(RobotController rc) {
-        super(rc, RobotType.SOLDIER);
+        super(rc, RobotType.SOLDIER, new Dijkstra20(rc));
     }
 
     @Override

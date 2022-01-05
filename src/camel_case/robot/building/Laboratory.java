@@ -3,10 +3,11 @@ package camel_case.robot.building;
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
+import camel_case.dijkstra.Dijkstra53;
 
 public class Laboratory extends Building {
     public Laboratory(RobotController rc) {
-        super(rc, RobotType.LABORATORY);
+        super(rc, RobotType.LABORATORY, new Dijkstra53(rc));
     }
 
     @Override

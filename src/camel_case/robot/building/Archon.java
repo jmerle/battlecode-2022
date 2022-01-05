@@ -5,6 +5,7 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
+import camel_case.dijkstra.Dijkstra34;
 
 public class Archon extends Building {
     private Direction[] spawnDirections;
@@ -12,7 +13,7 @@ public class Archon extends Building {
     private boolean hasSpawned = false;
 
     public Archon(RobotController rc) {
-        super(rc, RobotType.ARCHON);
+        super(rc, RobotType.ARCHON, new Dijkstra34(rc));
 
         setSpawnDirections();
     }
@@ -29,9 +30,9 @@ public class Archon extends Building {
     private void setSpawnDirections() {
         spawnDirections = new Direction[8];
 
-        MapLocation location = rc.getLocation();
-        String dx = location.x <= rc.getMapWidth() / 2 ? "EAST" : "WEST";
-        String dy = location.y <= rc.getMapHeight() / 2 ? "NORTH" : "SOUTH";
+        MapLocation myLocation = rc.getLocation();
+        String dx = myLocation.x <= rc.getMapWidth() / 2 ? "EAST" : "WEST";
+        String dy = myLocation.y <= rc.getMapHeight() / 2 ? "NORTH" : "SOUTH";
 
         spawnDirections[0] = Direction.valueOf(dy + dx);
 

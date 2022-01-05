@@ -28,7 +28,7 @@ public class RobotPlayer {
     }
 
     private static void performTurn(RobotController rc, Robot robot) {
-        int startTurn = rc.getRoundNum();
+        int startRound = rc.getRoundNum();
 
         try {
             robot.run();
@@ -37,7 +37,7 @@ public class RobotPlayer {
             e.printStackTrace();
         }
 
-        int usedBytecodes = (rc.getRoundNum() - startTurn) * rc.getType().bytecodeLimit + Clock.getBytecodeNum();
+        int usedBytecodes = (rc.getRoundNum() - startRound) * rc.getType().bytecodeLimit + Clock.getBytecodeNum();
         int maxBytecodes = rc.getType().bytecodeLimit;
         double bytecodePercentage = (double) usedBytecodes / (double) maxBytecodes * 100.0;
         if (bytecodePercentage >= 90) {

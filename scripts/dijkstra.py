@@ -80,8 +80,10 @@ import battlecode.common.RobotController;
 public class Dijkstra{vision_radius} implements Dijkstra {{
     private static RobotController rc;
 
-    private static MapLocation location0;
+    private static MapLocation myLocation;
     """.strip()
+
+    content += "\n"
 
     for (dx, dy) in offsets_by_distance:
         id = offsets[(dx, dy)]["id"]
@@ -120,16 +122,23 @@ public class Dijkstra{vision_radius} implements Dijkstra {{
 
     @Override
     public Direction getBestDirection(MapLocation target) throws GameActionException {{
-        location0 = rc.getLocation();
+        myLocation = rc.getLocation();
     """.rstrip()
+
+    content += "\n"
 
     for (dx, dy) in offsets_by_distance:
         id = offsets[(dx, dy)]["id"]
         previous_id = offsets[(dx, dy)]["previous_id"]
         direction_from_previous = offsets[(dx, dy)]["direction_from_previous"]
 
+        if distance(dx, dy) <= 2:
+            location = f"rc.adjacentLocation({direction_from_previous})"
+        else:
+            location = f"location{previous_id}.add({direction_from_previous})"
+
         content += f"""
-        location{id} = location{previous_id}.add({direction_from_previous});
+        location{id} = {location};
         distance{id} = 1_000_000.0;
         """.rstrip()
 
@@ -170,13 +179,13 @@ public class Dijkstra{vision_radius} implements Dijkstra {{
     content += "\n"
 
     content += """
-        switch (target.x - location0.x) {
+        switch (target.x - myLocation.x) {
     """.rstrip()
 
     for current_dx in sorted(set(dx for (dx, dy) in offsets)):
         content += f"""
             case {current_dx}:
-                switch (target.y - location0.y) {{
+                switch (target.y - myLocation.y) {{
         """.rstrip()
 
         for current_dy in sorted(dy for (dx, dy) in offsets if dx == current_dx):
@@ -198,7 +207,7 @@ public class Dijkstra{vision_radius} implements Dijkstra {{
     content += "\n"
     
     content += """
-        currentDistance = location0.distanceSquaredTo(target);
+        currentDistance = myLocation.distanceSquaredTo(target);
     """.rstrip()
 
     content += "\n"

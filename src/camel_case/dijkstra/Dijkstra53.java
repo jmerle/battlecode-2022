@@ -12,7 +12,8 @@ import battlecode.common.RobotController;
 public class Dijkstra53 implements Dijkstra {
     private static RobotController rc;
 
-    private static MapLocation location0;
+    private static MapLocation myLocation;
+
     private static MapLocation location1;
     private static double distance1;
     private static Direction direction1;
@@ -610,22 +611,23 @@ public class Dijkstra53 implements Dijkstra {
 
     @Override
     public Direction getBestDirection(MapLocation target) throws GameActionException {
-        location0 = rc.getLocation();
-        location1 = location0.add(Direction.WEST);
+        myLocation = rc.getLocation();
+
+        location1 = rc.adjacentLocation(Direction.WEST);
         distance1 = 1_000_000.0;
-        location2 = location0.add(Direction.EAST);
+        location2 = rc.adjacentLocation(Direction.EAST);
         distance2 = 1_000_000.0;
-        location3 = location0.add(Direction.SOUTH);
+        location3 = rc.adjacentLocation(Direction.SOUTH);
         distance3 = 1_000_000.0;
-        location4 = location0.add(Direction.NORTH);
+        location4 = rc.adjacentLocation(Direction.NORTH);
         distance4 = 1_000_000.0;
-        location5 = location0.add(Direction.SOUTHWEST);
+        location5 = rc.adjacentLocation(Direction.SOUTHWEST);
         distance5 = 1_000_000.0;
-        location6 = location0.add(Direction.NORTHWEST);
+        location6 = rc.adjacentLocation(Direction.NORTHWEST);
         distance6 = 1_000_000.0;
-        location7 = location0.add(Direction.SOUTHEAST);
+        location7 = rc.adjacentLocation(Direction.SOUTHEAST);
         distance7 = 1_000_000.0;
-        location8 = location0.add(Direction.NORTHEAST);
+        location8 = rc.adjacentLocation(Direction.NORTHEAST);
         distance8 = 1_000_000.0;
         location9 = location1.add(Direction.WEST);
         distance9 = 1_000_000.0;
@@ -3901,9 +3903,9 @@ public class Dijkstra53 implements Dijkstra {
             }
         }
 
-        switch (target.x - location0.x) {
+        switch (target.x - myLocation.x) {
             case -7:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -2:
                         return direction160;
                     case -1:
@@ -3917,7 +3919,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case -6:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -4:
                         return direction128;
                     case -3:
@@ -3939,7 +3941,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case -5:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -5:
                         return direction117;
                     case -4:
@@ -3965,7 +3967,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case -4:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -6:
                         return direction146;
                     case -5:
@@ -3995,7 +3997,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case -3:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -6:
                         return direction144;
                     case -5:
@@ -4025,7 +4027,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case -2:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -7:
                         return direction170;
                     case -6:
@@ -4059,7 +4061,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case -1:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -7:
                         return direction168;
                     case -6:
@@ -4093,7 +4095,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 0:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -7:
                         return direction167;
                     case -6:
@@ -4125,7 +4127,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 1:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -7:
                         return direction169;
                     case -6:
@@ -4159,7 +4161,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 2:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -7:
                         return direction171;
                     case -6:
@@ -4193,7 +4195,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 3:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -6:
                         return direction145;
                     case -5:
@@ -4223,7 +4225,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 4:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -6:
                         return direction147;
                     case -5:
@@ -4253,7 +4255,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 5:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -5:
                         return direction119;
                     case -4:
@@ -4279,7 +4281,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 6:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -4:
                         return direction137;
                     case -3:
@@ -4301,7 +4303,7 @@ public class Dijkstra53 implements Dijkstra {
                 }
                 break;
             case 7:
-                switch (target.y - location0.y) {
+                switch (target.y - myLocation.y) {
                     case -2:
                         return direction165;
                     case -1:
@@ -4316,7 +4318,7 @@ public class Dijkstra53 implements Dijkstra {
                 break;
         }
 
-        currentDistance = location0.distanceSquaredTo(target);
+        currentDistance = myLocation.distanceSquaredTo(target);
 
         score124 = (currentDistance - location124.distanceSquaredTo(target)) / distance124;
         score125 = (currentDistance - location125.distanceSquaredTo(target)) / distance125;

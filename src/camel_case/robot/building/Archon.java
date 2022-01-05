@@ -22,15 +22,15 @@ public class Archon extends Building {
     public void run() throws GameActionException {
         super.run();
 
-        if (!hasSpawned && tryBuildRobot(RobotType.SOLDIER)) {
-            hasSpawned = true;
+        if (!hasSpawned && tryBuildRobot(RobotType.MINER)) {
+            hasSpawned = false;
         }
     }
 
     private void setSpawnDirections() {
         spawnDirections = new Direction[8];
 
-        MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+        MapLocation center = new MapLocation(mapWidth / 2, mapHeight / 2);
         spawnDirections[0] = rc.getLocation().directionTo(center);
 
         spawnDirections[1] = spawnDirections[0].rotateLeft();
@@ -49,11 +49,9 @@ public class Archon extends Building {
         Direction bestDirection = null;
         int minRubble = Integer.MAX_VALUE;
 
-        MapLocation myLocation = rc.getLocation();
-
         for (Direction direction : spawnDirections) {
             if (rc.canBuildRobot(type, direction)) {
-                int rubble = rc.senseRubble(myLocation.add(direction));
+                int rubble = rc.senseRubble(rc.adjacentLocation(direction));
                 if (rubble < minRubble) {
                     minRubble = rubble;
                     bestDirection = direction;

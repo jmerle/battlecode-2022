@@ -13,5 +13,7 @@ public class Sage extends Droid {
     @Override
     public void run() throws GameActionException {
         super.run();
+
+        tryMoveRandom();
     }
 }

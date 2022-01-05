@@ -30,11 +30,8 @@ public class Archon extends Building {
     private void setSpawnDirections() {
         spawnDirections = new Direction[8];
 
-        MapLocation myLocation = rc.getLocation();
-        String dx = myLocation.x <= rc.getMapWidth() / 2 ? "EAST" : "WEST";
-        String dy = myLocation.y <= rc.getMapHeight() / 2 ? "NORTH" : "SOUTH";
-
-        spawnDirections[0] = Direction.valueOf(dy + dx);
+        MapLocation center = new MapLocation(rc.getMapWidth() / 2, rc.getMapHeight() / 2);
+        spawnDirections[0] = rc.getLocation().directionTo(center);
 
         spawnDirections[1] = spawnDirections[0].rotateLeft();
         spawnDirections[2] = spawnDirections[0].rotateRight();

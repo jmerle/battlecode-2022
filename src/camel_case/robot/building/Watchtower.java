@@ -17,7 +17,7 @@ public class Watchtower extends Building {
 
         RobotInfo target = getAttackTarget(me.actionRadiusSquared);
         if (target != null) {
-            tryAttack(target.location);
+            tryAttack(target);
         }
     }
 }

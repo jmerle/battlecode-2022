@@ -75,9 +75,14 @@ public abstract class Robot {
         }
     }
 
-    protected boolean tryAttack(MapLocation location) throws GameActionException {
-        if (rc.canAttack(location)) {
-            rc.attack(location);
+    protected boolean tryAttack(RobotInfo robot) throws GameActionException {
+        if (rc.canAttack(robot.location)) {
+            rc.attack(robot.location);
+
+            if (!me.isBuilding() && robot.type.isBuilding()) {
+                tryMoveTo(robot.location);
+            }
+
             return true;
         }
 

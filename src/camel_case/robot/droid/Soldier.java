@@ -18,7 +18,7 @@ public class Soldier extends Droid {
 
         RobotInfo target = getAttackTarget(me.actionRadiusSquared);
         if (target != null) {
-            tryAttack(target.location);
+            tryAttack(target);
             return;
         }
 

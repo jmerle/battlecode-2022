@@ -50,19 +50,11 @@ public class Miner extends Droid {
         }
 
         if (mineGoldTarget != null) {
-            if (myLocation.equals(mineGoldTarget)) {
-                tryMoveRandom();
-            } else {
-                tryMineGold(mineGoldTarget);
-            }
+            tryMineGold(mineGoldTarget);
         } else if (moveGoldTarget != null) {
             tryMoveTo(moveGoldTarget);
         } else if (mineLeadTarget != null) {
-            if (myLocation.equals(mineLeadTarget)) {
-                tryMoveRandom();
-            } else {
-                tryMineLead(mineLeadTarget);
-            }
+            tryMineLead(mineLeadTarget);
         } else if (moveLeadTarget != null) {
             tryMoveTo(moveLeadTarget);
         } else {

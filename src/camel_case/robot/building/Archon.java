@@ -22,7 +22,7 @@ public class Archon extends Building {
     public void run() throws GameActionException {
         super.run();
 
-        if (!hasSpawned && tryBuildRobot(RobotType.MINER)) {
+        if (!hasSpawned && tryBuildRobot(RobotType.SOLDIER)) {
             hasSpawned = false;
         }
     }

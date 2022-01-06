@@ -2,6 +2,7 @@ package camel_case.robot.building;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra34;
 
@@ -13,5 +14,10 @@ public class Watchtower extends Building {
     @Override
     public void run() throws GameActionException {
         super.run();
+
+        RobotInfo target = getAttackTarget();
+        if (target != null) {
+            tryAttack(target.location);
+        }
     }
 }

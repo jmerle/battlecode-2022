@@ -4,6 +4,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
 import camel_case.dijkstra.Dijkstra;
@@ -52,6 +53,35 @@ public abstract class Robot {
     }
 
     public void run() throws GameActionException {
+    }
+
+    protected boolean tryAttack(MapLocation location) throws GameActionException {
+        if (rc.canAttack(location)) {
+            rc.attack(location);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected RobotInfo getAttackTarget() {
+        RobotInfo bestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        MapLocation myLocation = rc.getLocation();
+
+        for (RobotInfo robot : rc.senseNearbyRobots(me.actionRadiusSquared, enemyTeam)) {
+            int distance = myLocation.distanceSquaredTo(robot.location);
+
+            if (bestTarget == null
+                    || distance < minDistance
+                    || (robot.type == RobotType.SAGE && bestTarget.type != RobotType.SAGE)) {
+                bestTarget = robot;
+                minDistance = distance;
+            }
+        }
+
+        return bestTarget;
     }
 
     protected boolean tryMove(Direction direction) throws GameActionException {

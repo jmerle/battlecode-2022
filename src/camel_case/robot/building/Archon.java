@@ -10,6 +10,8 @@ import camel_case.dijkstra.Dijkstra34;
 public class Archon extends Building {
     private Direction[] spawnDirections;
 
+    private int leadingMiners = 10;
+
     private RobotType[] spawnOrder = {
             RobotType.MINER,
             RobotType.SOLDIER,
@@ -32,6 +34,14 @@ public class Archon extends Building {
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {
             tryBuildRobot(RobotType.SOLDIER);
+            return;
+        }
+
+        if (leadingMiners > 0) {
+            if (tryBuildRobot(RobotType.MINER)) {
+                leadingMiners--;
+            }
+
             return;
         }
 

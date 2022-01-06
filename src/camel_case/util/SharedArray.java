@@ -11,13 +11,31 @@ public class SharedArray {
         this.rc = rc;
     }
 
-    public MapLocation getEnemyArchonLocation(int archonIndex) throws GameActionException {
+    public MapLocation getMyArchonLocation(int archonIndex) throws GameActionException {
         int value = rc.readSharedArray(archonIndex);
         return value > 0 ? intToLocation(value) : null;
     }
 
+    public void setMyArchonLocation(int archonIndex, MapLocation location) throws GameActionException {
+        write(archonIndex, locationToInt(location));
+    }
+
+    public MapLocation getEnemyArchonLocation(int archonIndex) throws GameActionException {
+        int value = rc.readSharedArray(archonIndex + 5);
+        return value > 0 ? intToLocation(value) : null;
+    }
+
     public void setEnemyArchonLocation(int archonIndex, MapLocation location) throws GameActionException {
-        write(archonIndex, location != null ? locationToInt(location) : 0);
+        write(archonIndex + 5, location != null ? locationToInt(location) : 0);
+    }
+
+    public MapLocation getPossibleEnemyArchonLocation(int index) throws GameActionException {
+        int value = rc.readSharedArray(index + 10);
+        return value > 0 ? intToLocation(value) : null;
+    }
+
+    public void setPossibleEnemyArchonLocation(int index, MapLocation location) throws GameActionException {
+        write(index + 10, location != null ? locationToInt(location) : 0);
     }
 
     public int archonIdToIndex(int id) {

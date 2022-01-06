@@ -10,6 +10,8 @@ import camel_case.dijkstra.Dijkstra34;
 public class Archon extends Building {
     private Direction[] spawnDirections;
 
+    private boolean isFirstRun = true;
+
     private int leadingMiners = 10;
 
     private RobotType[] spawnOrder = {
@@ -31,6 +33,23 @@ public class Archon extends Building {
     @Override
     public void run() throws GameActionException {
         super.run();
+
+        if (isFirstRun) {
+            sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
+
+            int knownArchonLocations = 0;
+            for (int i = 0; i < 5; i++) {
+                if (sharedArray.getMyArchonLocation(i) != null) {
+                    knownArchonLocations++;
+                }
+            }
+
+            if (knownArchonLocations == rc.getArchonCount()) {
+                setPossibleEnemyArchonLocations();
+            }
+
+            isFirstRun = false;
+        }
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {
             tryBuildRobot(RobotType.SOLDIER);
@@ -66,6 +85,41 @@ public class Archon extends Building {
         spawnDirections[6] = spawnDirections[4].rotateRight();
 
         spawnDirections[7] = spawnDirections[0].opposite();
+    }
+
+    private void setPossibleEnemyArchonLocations() throws GameActionException {
+        MapLocation[] locations = new MapLocation[15];
+
+        for (int i = 0; i < 5; i++) {
+            MapLocation myArchon = sharedArray.getMyArchonLocation(i);
+            if (myArchon == null) {
+                continue;
+            }
+
+            locations[3 * i] = new MapLocation(mapWidth - myArchon.x - 1, myArchon.y);
+            locations[3 * i + 1] = new MapLocation(myArchon.x, mapHeight - myArchon.y - 1);
+            locations[3 * i + 2] = new MapLocation(mapWidth - myArchon.x - 1, mapHeight - myArchon.y - 1);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            MapLocation myArchon = sharedArray.getMyArchonLocation(i);
+            if (myArchon == null) {
+                continue;
+            }
+
+            for (int j = 0; j < 15; j++) {
+                if (myArchon.equals(locations[j])) {
+                    locations[j] = null;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < 15; i++) {
+            if (locations[i] != null) {
+                sharedArray.setPossibleEnemyArchonLocation(i, locations[i]);
+            }
+        }
     }
 
     private boolean tryBuildRobot(RobotType type) throws GameActionException {

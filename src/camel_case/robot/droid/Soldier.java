@@ -6,10 +6,19 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
+import camel_case.util.ArrayUtils;
 
 public class Soldier extends Droid {
+    private int[] possibleEnemyArchonIndices = new int[15];
+
     public Soldier(RobotController rc) {
         super(rc, RobotType.SOLDIER, new Dijkstra20(rc));
+
+        for (int i = 0; i < 15; i++) {
+            possibleEnemyArchonIndices[i] = i;
+        }
+
+        ArrayUtils.shuffle(possibleEnemyArchonIndices);
     }
 
     @Override
@@ -22,16 +31,37 @@ public class Soldier extends Droid {
             return;
         }
 
-        for (int i = 0; i < 4; i++) {
+        MapLocation myLocation = rc.getLocation();
+        for (int i = 0; i < 5; i++) {
             MapLocation archon = sharedArray.getEnemyArchonLocation(i);
             if (archon != null) {
-                if (rc.getLocation().distanceSquaredTo(archon) <= me.actionRadiusSquared) {
+                if (myLocation.distanceSquaredTo(archon) <= me.actionRadiusSquared) {
                     sharedArray.setEnemyArchonLocation(i, null);
                 } else {
                     tryMoveTo(archon);
                     return;
                 }
             }
+        }
+
+        if (rc.getID() % 3 == 0) {
+            tryWander();
+            return;
+        }
+
+        for (int index : possibleEnemyArchonIndices) {
+            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(index);
+            if (possibleEnemyArchon == null) {
+                continue;
+            }
+
+            if (rc.canSenseLocation(possibleEnemyArchon)) {
+                sharedArray.setPossibleEnemyArchonLocation(index, null);
+                continue;
+            }
+
+            tryMoveTo(possibleEnemyArchon);
+            return;
         }
 
         tryWander();

@@ -137,7 +137,7 @@ public abstract class Robot {
     }
 
     protected boolean tryMoveRandom() throws GameActionException {
-        for (Direction direction : ArrayUtils.shuffle(adjacentDirections)) {
+        for (Direction direction : ArrayUtils.shuffle(adjacentDirections.clone())) {
             if (tryMove(direction)) {
                 return true;
             }

@@ -94,20 +94,16 @@ public abstract class Robot {
 
     protected RobotInfo getAttackTarget(int radius) {
         RobotInfo bestTarget = null;
-        int minDistance = Integer.MAX_VALUE;
+        int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
-
-        MapLocation myLocation = rc.getLocation();
 
         for (RobotInfo robot : rc.senseNearbyRobots(radius, enemyTeam)) {
             int priority = attackPriorities[robot.type.ordinal()];
-            int distance = myLocation.distanceSquaredTo(robot.location);
-
             if (bestTarget == null
                     || priority > maxPriority
-                    || (distance < minDistance && priority == maxPriority)) {
+                    || (robot.health < minHealth && priority == maxPriority)) {
                 bestTarget = robot;
-                minDistance = distance;
+                minHealth = robot.health;
                 maxPriority = priority;
             }
         }

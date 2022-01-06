@@ -36,6 +36,10 @@ public class Miner extends Droid {
         }
 
         for (MapLocation location : rc.senseNearbyLocationsWithLead(me.visionRadiusSquared)) {
+            if (rc.senseLead(location) == 1) {
+                continue;
+            }
+
             int distance = myLocation.distanceSquaredTo(location);
             if (distance <= 2) {
                 mineLeadTarget = location;
@@ -51,14 +55,14 @@ public class Miner extends Droid {
             } else {
                 tryMineGold(mineGoldTarget);
             }
+        } else if (moveGoldTarget != null) {
+            tryMoveTo(moveGoldTarget);
         } else if (mineLeadTarget != null) {
             if (myLocation.equals(mineLeadTarget)) {
                 tryMoveRandom();
             } else {
                 tryMineLead(mineLeadTarget);
             }
-        } else if (moveGoldTarget != null) {
-            tryMoveTo(moveGoldTarget);
         } else if (moveLeadTarget != null) {
             tryMoveTo(moveLeadTarget);
         } else {
@@ -78,7 +82,7 @@ public class Miner extends Droid {
 
     private boolean tryMineLead(MapLocation location) throws GameActionException {
         boolean minedLead = false;
-        while (rc.canMineLead(location)) {
+        while (rc.canMineLead(location) && rc.senseLead(location) > 1) {
             rc.mineLead(location);
             minedLead = true;
         }

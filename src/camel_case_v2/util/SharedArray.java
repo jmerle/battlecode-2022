@@ -21,7 +21,7 @@ public class SharedArray {
     }
 
     public int archonIdToIndex(int id) {
-        return id % 2 == 0 ? id / 2 - 1 : (id - 1) / 2;
+        return id % 2 == 0 ? id / 2 : (id - 1) / 2;
     }
 
     private int locationToInt(MapLocation location) {

@@ -34,6 +34,16 @@ public abstract class Robot {
             Direction.NORTHWEST
     };
 
+    private int[] attackPriorities = {
+            7, // Archon
+            3, // Laboratory
+            6, // Watchtower
+            0, // Miner
+            0, // Builder
+            4, // Soldier
+            5 // Sage
+    };
+
     private Direction[] wanderQuadrants;
     private int wanderQuadrantIndex;
     private MapLocation currentWanderTarget;
@@ -67,17 +77,24 @@ public abstract class Robot {
     protected RobotInfo getAttackTarget() {
         RobotInfo bestTarget = null;
         int minDistance = Integer.MAX_VALUE;
+        int maxPriority = Integer.MIN_VALUE;
 
         MapLocation myLocation = rc.getLocation();
 
         for (RobotInfo robot : rc.senseNearbyRobots(me.actionRadiusSquared, enemyTeam)) {
+            int priority = attackPriorities[robot.type.ordinal()];
+            if (priority == 0) {
+                continue;
+            }
+
             int distance = myLocation.distanceSquaredTo(robot.location);
 
             if (bestTarget == null
-                    || distance < minDistance
-                    || (robot.type == RobotType.SAGE && bestTarget.type != RobotType.SAGE)) {
+                    || priority > maxPriority
+                    || (distance < minDistance && priority == maxPriority)) {
                 bestTarget = robot;
                 minDistance = distance;
+                maxPriority = priority;
             }
         }
 

@@ -10,7 +10,7 @@ import camel_case.dijkstra.Dijkstra34;
 public class Archon extends Building {
     private Direction[] spawnDirections;
 
-    private int leadingMiners;
+    private int leadingMiners = 10;
 
     private RobotType[] spawnOrder = {
             RobotType.SOLDIER,
@@ -24,8 +24,6 @@ public class Archon extends Building {
 
     public Archon(RobotController rc) {
         super(rc, RobotType.ARCHON, new Dijkstra34(rc));
-
-        leadingMiners = Math.max(mapWidth, mapHeight) / 4 / rc.getArchonCount();
 
         setSpawnDirections();
     }

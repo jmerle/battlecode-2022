@@ -10,6 +10,7 @@ import battlecode.common.Team;
 import camel_case.dijkstra.Dijkstra;
 import camel_case.util.ArrayUtils;
 import camel_case.util.RandomUtils;
+import camel_case.util.SharedArray;
 
 public abstract class Robot {
     protected RobotController rc;
@@ -20,6 +21,8 @@ public abstract class Robot {
 
     protected int mapWidth;
     protected int mapHeight;
+
+    protected SharedArray sharedArray;
 
     private Dijkstra dijkstra;
 
@@ -38,8 +41,8 @@ public abstract class Robot {
             7, // Archon
             3, // Laboratory
             6, // Watchtower
-            0, // Miner
-            0, // Builder
+            2, // Miner
+            1, // Builder
             4, // Soldier
             5 // Sage
     };
@@ -59,10 +62,17 @@ public abstract class Robot {
         mapWidth = rc.getMapWidth();
         mapHeight = rc.getMapHeight();
 
+        sharedArray = new SharedArray(rc);
+
         this.dijkstra = dijkstra;
     }
 
     public void run() throws GameActionException {
+        for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, enemyTeam)) {
+            if (robot.type == RobotType.ARCHON) {
+                sharedArray.setEnemyArchonLocation(sharedArray.archonIdToIndex(robot.ID), robot.location);
+            }
+        }
     }
 
     protected boolean tryAttack(MapLocation location) throws GameActionException {
@@ -83,10 +93,6 @@ public abstract class Robot {
 
         for (RobotInfo robot : rc.senseNearbyRobots(radius, enemyTeam)) {
             int priority = attackPriorities[robot.type.ordinal()];
-            if (priority == 0) {
-                continue;
-            }
-
             int distance = myLocation.distanceSquaredTo(robot.location);
 
             if (bestTarget == null

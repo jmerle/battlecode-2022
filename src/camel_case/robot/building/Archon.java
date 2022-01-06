@@ -11,7 +11,7 @@ public class Archon extends Building {
     private Direction[] spawnDirections;
 
     private RobotType[] spawnOrder1 = {
-            RobotType.MINER,
+            RobotType.SOLDIER,
             RobotType.MINER,
             RobotType.SOLDIER
     };
@@ -19,8 +19,9 @@ public class Archon extends Building {
     private RobotType[] spawnOrder2 = {
             RobotType.SOLDIER,
             RobotType.SOLDIER,
-            RobotType.SOLDIER,
             RobotType.MINER,
+            RobotType.SOLDIER,
+            RobotType.SOLDIER
     };
 
     private RobotType[] spawnOrder = spawnOrder1;
@@ -79,8 +80,7 @@ public class Archon extends Building {
             return true;
         }
 
-        int myId = rc.getID();
-        int archonIndex = myId % 2 == 0 ? myId / 2 - 1 : (myId - 1) / 2 - 1;
+        int archonIndex = sharedArray.archonIdToIndex(rc.getID());
 
         int startOffset = 100 / archonCount * archonIndex;
         int endOffset = 100 / archonCount * (archonIndex + 1);

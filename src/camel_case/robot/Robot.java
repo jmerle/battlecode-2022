@@ -47,6 +47,9 @@ public abstract class Robot {
             5 // Sage
     };
 
+    private MapLocation previousMoveToTarget;
+    private Direction previousMoveToDirection;
+
     private Direction[] wanderQuadrants;
     private int wanderQuadrantIndex;
     private MapLocation currentWanderTarget;
@@ -122,8 +125,19 @@ public abstract class Robot {
     }
 
     protected boolean tryMoveTo(MapLocation target) throws GameActionException {
-        Direction bestDirection = dijkstra.getBestDirection(target);
-        return bestDirection != null && tryMove(bestDirection);
+        Direction blockedDirection = target.equals(previousMoveToTarget) && previousMoveToDirection != null
+                ? previousMoveToDirection.opposite()
+                : null;
+
+        previousMoveToTarget = target;
+
+        Direction bestDirection = dijkstra.getBestDirection(target, blockedDirection);
+        if (bestDirection != null && tryMove(bestDirection)) {
+            previousMoveToDirection = bestDirection;
+            return true;
+        }
+
+        return false;
     }
 
     protected boolean tryMoveRandom() throws GameActionException {

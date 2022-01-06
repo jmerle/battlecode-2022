@@ -121,7 +121,7 @@ public class Dijkstra{vision_radius} implements Dijkstra {{
     }}
 
     @Override
-    public Direction getBestDirection(MapLocation target) throws GameActionException {{
+    public Direction getBestDirection(MapLocation target, Direction blockedDirection) throws GameActionException {{
         myLocation = rc.getLocation();
     """.rstrip()
 
@@ -152,7 +152,7 @@ public class Dijkstra{vision_radius} implements Dijkstra {{
 
         if distance(dx, dy) <= 2:
             content += f"""
-        if (rc.canMove({direction(dx, dy)})) {{
+        if (blockedDirection != {direction(dx, dy)} && rc.canMove({direction(dx, dy)})) {{
             distance{id} = {weight};
             direction{id} = {direction(dx, dy)};
         }}

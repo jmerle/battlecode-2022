@@ -5,5 +5,5 @@ import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 
 public interface Dijkstra {
-    Direction getBestDirection(MapLocation target) throws GameActionException;
+    Direction getBestDirection(MapLocation target, Direction blockedDirection) throws GameActionException;
 }

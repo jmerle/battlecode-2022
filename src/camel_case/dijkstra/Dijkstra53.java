@@ -610,7 +610,7 @@ public class Dijkstra53 implements Dijkstra {
     }
 
     @Override
-    public Direction getBestDirection(MapLocation target) throws GameActionException {
+    public Direction getBestDirection(MapLocation target, Direction blockedDirection) throws GameActionException {
         myLocation = rc.getLocation();
 
         location1 = rc.adjacentLocation(Direction.WEST);
@@ -966,35 +966,35 @@ public class Dijkstra53 implements Dijkstra {
         location176 = location150.add(Direction.NORTHEAST);
         distance176 = 1_000_000.0;
 
-        if (rc.canMove(Direction.WEST)) {
+        if (blockedDirection != Direction.WEST && rc.canMove(Direction.WEST)) {
             distance1 = 1.0 + rc.senseRubble(location1);
             direction1 = Direction.WEST;
         }
-        if (rc.canMove(Direction.EAST)) {
+        if (blockedDirection != Direction.EAST && rc.canMove(Direction.EAST)) {
             distance2 = 1.0 + rc.senseRubble(location2);
             direction2 = Direction.EAST;
         }
-        if (rc.canMove(Direction.SOUTH)) {
+        if (blockedDirection != Direction.SOUTH && rc.canMove(Direction.SOUTH)) {
             distance3 = 1.0 + rc.senseRubble(location3);
             direction3 = Direction.SOUTH;
         }
-        if (rc.canMove(Direction.NORTH)) {
+        if (blockedDirection != Direction.NORTH && rc.canMove(Direction.NORTH)) {
             distance4 = 1.0 + rc.senseRubble(location4);
             direction4 = Direction.NORTH;
         }
-        if (rc.canMove(Direction.SOUTHWEST)) {
+        if (blockedDirection != Direction.SOUTHWEST && rc.canMove(Direction.SOUTHWEST)) {
             distance5 = 1.0 + rc.senseRubble(location5);
             direction5 = Direction.SOUTHWEST;
         }
-        if (rc.canMove(Direction.NORTHWEST)) {
+        if (blockedDirection != Direction.NORTHWEST && rc.canMove(Direction.NORTHWEST)) {
             distance6 = 1.0 + rc.senseRubble(location6);
             direction6 = Direction.NORTHWEST;
         }
-        if (rc.canMove(Direction.SOUTHEAST)) {
+        if (blockedDirection != Direction.SOUTHEAST && rc.canMove(Direction.SOUTHEAST)) {
             distance7 = 1.0 + rc.senseRubble(location7);
             direction7 = Direction.SOUTHEAST;
         }
-        if (rc.canMove(Direction.NORTHEAST)) {
+        if (blockedDirection != Direction.NORTHEAST && rc.canMove(Direction.NORTHEAST)) {
             distance8 = 1.0 + rc.senseRubble(location8);
             direction8 = Direction.NORTHEAST;
         }

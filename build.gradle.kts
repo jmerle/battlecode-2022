@@ -105,7 +105,7 @@ task("update") {
         if (file(examplefuncsplayerPath).readText() == latestExamplefuncsplayer) {
             println("Already using the latest examplefuncsplayer")
         } else {
-            file(examplefuncsplayerPath).writeText(latestExamplefuncsplayer + "\n")
+            file(examplefuncsplayerPath).writeText(latestExamplefuncsplayer)
             println("Updated examplefuncsplayer to the latest version")
         }
     }

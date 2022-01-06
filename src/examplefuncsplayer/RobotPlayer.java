@@ -176,4 +176,3 @@ public strictfp class RobotPlayer {
         }
     }
 }
-

@@ -34,6 +34,13 @@ fun get(url: String): String {
     return URL(url).readText().trim()
 }
 
+fun formatExamplefuncsplayer(content: String): String {
+    return content
+        .trim()
+        .replace("System.out.", "// System.out.")
+        .replace("e.printStackTrace()", "// e.printStackTrace()") + "\n"
+}
+
 val replayPath = "replays/${project.property("teamA")}-vs-${project.property("teamB")}-on-%MAP%.bc22"
 
 val clientType = with(System.getProperty("os.name").toLowerCase()) {
@@ -75,7 +82,7 @@ task("checkForUpdates") {
             print("\n\n\nBATTLECODE UPDATE AVAILABLE ($battlecodeVersion -> $latestBattlecodeVersion)\n\n\n")
         }
 
-        if (file(examplefuncsplayerPath).readText().trim() != get(examplefuncsplayerUrl)) {
+        if (file(examplefuncsplayerPath).readText() != formatExamplefuncsplayer(get(examplefuncsplayerUrl))) {
             print("\n\n\nEXAMPLEFUNCSPLAYER UPDATE AVAILABLE\n\n\n")
         }
     }
@@ -94,9 +101,8 @@ task("update") {
             println("Updated Battlecode from $battlecodeVersion to $latestBattlecodeVersion, please reload the Gradle project")
         }
 
-        val currentExamplefuncsplayer = file(examplefuncsplayerPath).readText().trim()
-        val latestExamplefuncsplayer = get(examplefuncsplayerUrl)
-        if (currentExamplefuncsplayer == latestExamplefuncsplayer) {
+        val latestExamplefuncsplayer = formatExamplefuncsplayer(get(examplefuncsplayerUrl))
+        if (file(examplefuncsplayerPath).readText() == latestExamplefuncsplayer) {
             println("Already using the latest examplefuncsplayer")
         } else {
             file(examplefuncsplayerPath).writeText(latestExamplefuncsplayer + "\n")

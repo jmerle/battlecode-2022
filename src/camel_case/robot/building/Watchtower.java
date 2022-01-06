@@ -15,7 +15,7 @@ public class Watchtower extends Building {
     public void run() throws GameActionException {
         super.run();
 
-        RobotInfo target = getAttackTarget();
+        RobotInfo target = getAttackTarget(me.actionRadiusSquared);
         if (target != null) {
             tryAttack(target.location);
         }

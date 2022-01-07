@@ -43,10 +43,10 @@ public class SharedArray {
 
         int roundOffset = rc.getRoundNum() * 10;
         if (value < roundOffset) {
-            write(15, roundOffset);
+            write(25, roundOffset);
             return 0;
         } else {
-            write(15, value + 1);
+            write(25, value + 1);
             return value - roundOffset + 1;
         }
     }

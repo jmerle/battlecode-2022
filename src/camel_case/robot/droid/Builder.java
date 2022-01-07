@@ -10,7 +10,7 @@ import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
 
 public class Builder extends Droid {
-    private MapLocation archonLocation;
+    private MapLocation archonLocation = null;
 
     public Builder(RobotController rc) {
         super(rc, RobotType.BUILDER, new Dijkstra20(rc));
@@ -70,7 +70,7 @@ public class Builder extends Droid {
             rc.buildRobot(RobotType.WATCHTOWER, bestDirection);
         }
 
-        tryMoveRandom();
+        tryWander();
     }
 
     private boolean tryRepair(MapLocation location) throws GameActionException {

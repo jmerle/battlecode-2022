@@ -1,12 +1,16 @@
 package camel_case.robot.droid;
 
+import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
 
 public class Miner extends Droid {
+    private MapLocation archonLocation = null;
+
     public Miner(RobotController rc) {
         super(rc, RobotType.MINER, new Dijkstra20(rc));
     }
@@ -14,6 +18,15 @@ public class Miner extends Droid {
     @Override
     public void run() throws GameActionException {
         super.run();
+
+        if (archonLocation == null) {
+            for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, myTeam)) {
+                if (robot.type == RobotType.ARCHON) {
+                    archonLocation = robot.location;
+                    break;
+                }
+            }
+        }
 
         MapLocation myLocation = rc.getLocation();
 
@@ -77,6 +90,15 @@ public class Miner extends Droid {
         while (rc.canMineLead(location) && rc.senseLead(location) > 1) {
             rc.mineLead(location);
             minedLead = true;
+        }
+
+        MapLocation myLocation = rc.getLocation();
+        if (archonLocation != null && myLocation.isAdjacentTo(archonLocation)) {
+            for (Direction direction : adjacentDirections) {
+                if (!myLocation.add(direction).isAdjacentTo(archonLocation) && tryMove(direction)) {
+                    break;
+                }
+            }
         }
 
         return minedLead;

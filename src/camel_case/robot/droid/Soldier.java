@@ -44,7 +44,7 @@ public class Soldier extends Droid {
             }
         }
 
-        if (rc.getID() % 3 == 0) {
+        if (rc.getID() % 3 == 0 && rc.getTeamLeadAmount(myTeam) < 500) {
             tryWander();
             return;
         }

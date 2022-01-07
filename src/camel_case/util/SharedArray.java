@@ -38,6 +38,19 @@ public class SharedArray {
         write(index + 10, location != null ? locationToInt(location) : 0);
     }
 
+    public int getArchonTurnIndex() throws GameActionException {
+        int value = rc.readSharedArray(25);
+
+        int roundOffset = rc.getRoundNum() * 10;
+        if (value < roundOffset) {
+            write(15, roundOffset);
+            return 0;
+        } else {
+            write(15, value + 1);
+            return value - roundOffset + 1;
+        }
+    }
+
     public int archonIdToIndex(int id) {
         return id % 2 == 0 ? id / 2 : (id - 1) / 2;
     }

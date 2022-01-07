@@ -6,6 +6,7 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra34;
+import camel_case.util.RandomUtils;
 
 public class Archon extends Building {
     private Direction[] spawnDirections;
@@ -49,6 +50,12 @@ public class Archon extends Building {
             }
 
             isFirstRun = false;
+        }
+
+        double archonCount = rc.getArchonCount();
+        double turnIndex = sharedArray.getArchonTurnIndex();
+        if (!RandomUtils.chance((turnIndex + 1) / archonCount)) {
+            return;
         }
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {

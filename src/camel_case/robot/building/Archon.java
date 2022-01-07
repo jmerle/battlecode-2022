@@ -19,6 +19,7 @@ public class Archon extends Building {
             RobotType.SOLDIER,
             RobotType.SOLDIER,
             RobotType.MINER,
+            RobotType.BUILDER,
             RobotType.SOLDIER,
             RobotType.SOLDIER
     };
@@ -69,6 +70,12 @@ public class Archon extends Building {
             }
 
             return;
+        }
+
+        if (rc.getTeamLeadAmount(myTeam) < 500) {
+            while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER) {
+                spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
+            }
         }
 
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {

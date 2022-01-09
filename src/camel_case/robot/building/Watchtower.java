@@ -7,33 +7,25 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra34;
-import camel_case.util.ArrayUtils;
 
 public class Watchtower extends Building {
-    private int[] possibleEnemyArchonIndices = new int[15];
-
     public Watchtower(RobotController rc) {
         super(rc, RobotType.WATCHTOWER, new Dijkstra34(rc));
-
-        for (int i = 0; i < 15; i++) {
-            possibleEnemyArchonIndices[i] = i;
-        }
-
-        ArrayUtils.shuffle(possibleEnemyArchonIndices);
     }
 
     @Override
     public void run() throws GameActionException {
         super.run();
 
-        RobotInfo target = getAttackTarget(me.actionRadiusSquared);
-        if (target != null) {
+        RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
+        if (attackTarget != null) {
             if (rc.getMode() == RobotMode.PORTABLE) {
                 tryTransform();
                 return;
             }
 
-            tryAttack(target);
+            tryAttack(attackTarget);
+            return;
         }
 
         if (rc.getMode() == RobotMode.TURRET) {
@@ -41,31 +33,15 @@ public class Watchtower extends Building {
             return;
         }
 
-        MapLocation myLocation = rc.getLocation();
-        for (int i = 0; i < 5; i++) {
-            MapLocation archon = sharedArray.getEnemyArchonLocation(i);
-            if (archon != null) {
-                if (myLocation.distanceSquaredTo(archon) <= me.actionRadiusSquared) {
-                    sharedArray.setEnemyArchonLocation(i, null);
-                } else {
-                    tryMoveTo(archon);
-                    return;
-                }
-            }
+        MapLocation dangerTarget = getClosestDangerTarget();
+        if (dangerTarget != null) {
+            tryMoveTo(dangerTarget);
+            return;
         }
 
-        for (int index : possibleEnemyArchonIndices) {
-            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(index);
-            if (possibleEnemyArchon == null) {
-                continue;
-            }
-
-            if (rc.canSenseLocation(possibleEnemyArchon)) {
-                sharedArray.setPossibleEnemyArchonLocation(index, null);
-                continue;
-            }
-
-            tryMoveTo(possibleEnemyArchon);
+        MapLocation archonTarget = getArchonTarget();
+        if (archonTarget != null) {
+            tryMoveTo(archonTarget);
             return;
         }
 

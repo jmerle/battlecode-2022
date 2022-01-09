@@ -47,6 +47,8 @@ public abstract class Robot {
             5 // Sage
     };
 
+    private int[] possibleEnemyArchonIndices;
+
     private MapLocation previousMoveToTarget;
     private Direction previousMoveToDirection;
 
@@ -136,6 +138,49 @@ public abstract class Robot {
         return bestTarget;
     }
 
+    protected MapLocation getArchonTarget() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+        for (int i = 0; i < 5; i++) {
+            MapLocation archon = sharedArray.getEnemyArchonLocation(i);
+            if (archon == null) {
+                continue;
+            }
+
+            if (myLocation.distanceSquaredTo(archon) <= me.actionRadiusSquared) {
+                sharedArray.setEnemyArchonLocation(i, null);
+                continue;
+            }
+
+            return archon;
+        }
+
+        if (possibleEnemyArchonIndices == null) {
+            possibleEnemyArchonIndices = new int[15];
+
+            for (int i = 0; i < 15; i++) {
+                possibleEnemyArchonIndices[i] = i;
+            }
+
+            ArrayUtils.shuffle(possibleEnemyArchonIndices);
+        }
+
+        for (int index : possibleEnemyArchonIndices) {
+            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(index);
+            if (possibleEnemyArchon == null) {
+                continue;
+            }
+
+            if (rc.canSenseLocation(possibleEnemyArchon)) {
+                sharedArray.setPossibleEnemyArchonLocation(index, null);
+                continue;
+            }
+
+            return possibleEnemyArchon;
+        }
+
+        return null;
+    }
+
     protected void lookForDangerTargets() throws GameActionException {
         int defenderCount = me.canAttack() ? 1 : 0;
         int enemyCount = 0;
@@ -181,6 +226,28 @@ public abstract class Robot {
                 }
             }
         }
+    }
+
+    protected MapLocation getClosestDangerTarget() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation closestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int i = 0; i < 20; i++) {
+            MapLocation target = sharedArray.getDangerTarget(i);
+            if (target == null) {
+                continue;
+            }
+
+            int distance = myLocation.distanceSquaredTo(target);
+            if (distance < minDistance) {
+                closestTarget = target;
+                minDistance = distance;
+            }
+        }
+
+        return closestTarget;
     }
 
     protected boolean tryMove(Direction direction) throws GameActionException {

@@ -28,9 +28,9 @@ public class Soldier extends Droid {
         removeInvalidDangerTargets();
         lookForDangerTargets();
 
-        RobotInfo targetInRange = getAttackTarget(me.actionRadiusSquared);
-        if (targetInRange != null) {
-            tryAttack(targetInRange);
+        RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
+        if (attackTarget != null) {
+            tryAttack(attackTarget);
             return;
         }
 
@@ -40,17 +40,51 @@ public class Soldier extends Droid {
             return;
         }
 
+        MapLocation archonTarget = getArchonTarget();
+        if (archonTarget != null) {
+            tryMoveTo(archonTarget);
+            return;
+        }
+
+        tryWander();
+    }
+
+    private MapLocation getClosestDangerTarget() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation closestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int i = 0; i < 20; i++) {
+            MapLocation target = sharedArray.getDangerTarget(i);
+            if (target == null) {
+                continue;
+            }
+
+            int distance = myLocation.distanceSquaredTo(target);
+            if (distance < minDistance) {
+                closestTarget = target;
+                minDistance = distance;
+            }
+        }
+
+        return closestTarget;
+    }
+
+    private MapLocation getArchonTarget() throws GameActionException {
         MapLocation myLocation = rc.getLocation();
         for (int i = 0; i < 5; i++) {
             MapLocation archon = sharedArray.getEnemyArchonLocation(i);
-            if (archon != null) {
-                if (myLocation.distanceSquaredTo(archon) <= me.actionRadiusSquared) {
-                    sharedArray.setEnemyArchonLocation(i, null);
-                } else {
-                    tryMoveTo(archon);
-                    return;
-                }
+            if (archon == null) {
+                continue;
             }
+
+            if (myLocation.distanceSquaredTo(archon) <= me.actionRadiusSquared) {
+                sharedArray.setEnemyArchonLocation(i, null);
+                continue;
+            }
+
+            return archon;
         }
 
         for (int index : possibleEnemyArchonIndices) {
@@ -64,32 +98,9 @@ public class Soldier extends Droid {
                 continue;
             }
 
-            tryMoveTo(possibleEnemyArchon);
-            return;
+            return possibleEnemyArchon;
         }
 
-        tryWander();
-    }
-
-    private MapLocation getClosestDangerTarget() throws GameActionException {
-        MapLocation myLocation = rc.getLocation();
-
-        MapLocation closestTarget = null;
-        int minDangerDistance = Integer.MAX_VALUE;
-
-        for (int i = 0; i < 20; i++) {
-            MapLocation target = sharedArray.getDangerTarget(i);
-            if (target == null) {
-                continue;
-            }
-
-            int distance = myLocation.distanceSquaredTo(target);
-            if (distance < minDangerDistance) {
-                closestTarget = target;
-                minDangerDistance = distance;
-            }
-        }
-
-        return closestTarget;
+        return null;
     }
 }

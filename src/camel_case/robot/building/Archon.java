@@ -15,6 +15,7 @@ public class Archon extends Building {
     private boolean isFirstRun = true;
 
     private int minersSpawned = 0;
+    private int maxLeadingMiners;
 
     private RobotType[] spawnOrder = {
             RobotType.SOLDIER,
@@ -50,6 +51,8 @@ public class Archon extends Building {
                 setPossibleEnemyArchonLocations();
             }
 
+            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 5);
+
             isFirstRun = false;
         }
 
@@ -75,7 +78,7 @@ public class Archon extends Building {
             }
         }
 
-        if (!hasDangerTargets && minersSpawned < 10) {
+        if (!hasDangerTargets && minersSpawned < maxLeadingMiners) {
             if (tryBuildRobot(RobotType.MINER)) {
                 minersSpawned++;
             }

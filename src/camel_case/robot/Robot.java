@@ -165,6 +165,7 @@ public abstract class Robot {
             for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
                 if (sharedArray.getDangerTarget(i) == null) {
                     sharedArray.setDangerTarget(i, closestTarget);
+                    break;
                 }
             }
         }

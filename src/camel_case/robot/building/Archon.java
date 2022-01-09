@@ -37,6 +37,9 @@ public class Archon extends Building {
     public void run() throws GameActionException {
         super.run();
 
+        int turnIndex = sharedArray.getArchonTurnIndex();
+        int archonCount = rc.getArchonCount();
+
         if (isFirstRun) {
             sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
 
@@ -64,9 +67,7 @@ public class Archon extends Building {
             return;
         }
 
-        double archonCount = rc.getArchonCount();
-        double turnIndex = sharedArray.getArchonTurnIndex();
-        if (!RandomUtils.chance((turnIndex + 1) / archonCount)) {
+        if (!RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
             return;
         }
 

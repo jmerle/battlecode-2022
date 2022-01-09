@@ -15,4 +15,13 @@ public abstract class Building extends Robot {
     public void run() throws GameActionException {
         super.run();
     }
+
+    protected boolean tryTransform() throws GameActionException {
+        if (rc.canTransform()) {
+            rc.transform();
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -14,6 +14,8 @@ public class Archon extends Building {
 
     private boolean isFirstRun = true;
 
+    private int minersSpawned = 0;
+
     private RobotType[] spawnOrder = {
             RobotType.SOLDIER,
             RobotType.SOLDIER,
@@ -73,8 +75,11 @@ public class Archon extends Building {
             }
         }
 
-        if (!hasDangerTargets) {
-            tryBuildRobot(RobotType.MINER);
+        if (!hasDangerTargets && minersSpawned < 10) {
+            if (tryBuildRobot(RobotType.MINER)) {
+                minersSpawned++;
+            }
+
             return;
         }
 

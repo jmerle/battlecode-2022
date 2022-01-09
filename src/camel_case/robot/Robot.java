@@ -111,6 +111,52 @@ public abstract class Robot {
         return bestTarget;
     }
 
+    protected void lookForDangerTargets() throws GameActionException {
+        int defenderCount = me.canAttack() ? 1 : 0;
+        int enemyCount = 0;
+
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation closestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared)) {
+            if (robot.team == myTeam) {
+                if (robot.type.canAttack()) {
+                    defenderCount++;
+                }
+            } else {
+                enemyCount++;
+
+                int distance = myLocation.distanceSquaredTo(robot.location);
+                if (distance < minDistance) {
+                    closestTarget = robot.location;
+                    minDistance = distance;
+                }
+            }
+        }
+
+        if (enemyCount > 0 && enemyCount >= defenderCount) {
+            for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
+                if (sharedArray.getDangerTarget(i) == null) {
+                    sharedArray.setDangerTarget(i, closestTarget);
+                }
+            }
+        }
+    }
+
+    protected void removeInvalidDangerTargets() throws GameActionException {
+        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
+            MapLocation target = sharedArray.getDangerTarget(i);
+            if (target != null && rc.canSenseLocation(target)) {
+                RobotInfo robot = rc.senseRobotAtLocation(target);
+                if (robot == null || robot.team == myTeam) {
+                    sharedArray.setDangerTarget(i, null);
+                }
+            }
+        }
+    }
+
     protected boolean tryMove(Direction direction) throws GameActionException {
         if (rc.canMove(direction)) {
             rc.move(direction);

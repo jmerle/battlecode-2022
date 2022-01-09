@@ -40,7 +40,7 @@ public class RobotPlayer {
         int usedBytecodes = (rc.getRoundNum() - startRound) * rc.getType().bytecodeLimit + Clock.getBytecodeNum();
         int maxBytecodes = rc.getType().bytecodeLimit;
         double bytecodePercentage = (double) usedBytecodes / (double) maxBytecodes * 100.0;
-        if (bytecodePercentage >= 90) {
+        if (bytecodePercentage >= 95) {
             String format = "High bytecode usage!\n%s/%s (%s%%)\n";
             System.out.printf(format, usedBytecodes, maxBytecodes, (int) Math.round(bytecodePercentage));
         }

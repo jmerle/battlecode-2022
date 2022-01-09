@@ -7,21 +7,19 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra34;
 import camel_case.util.RandomUtils;
+import camel_case.util.SharedArray;
 
 public class Archon extends Building {
     private Direction[] spawnDirections;
 
     private boolean isFirstRun = true;
 
-    private int leadingMiners = 10;
-
     private RobotType[] spawnOrder = {
             RobotType.SOLDIER,
             RobotType.SOLDIER,
-            RobotType.MINER,
-            RobotType.BUILDER,
             RobotType.SOLDIER,
-            RobotType.SOLDIER
+            RobotType.MINER,
+            RobotType.BUILDER
     };
 
     private int spawnOrderIndex = 0;
@@ -53,22 +51,30 @@ public class Archon extends Building {
             isFirstRun = false;
         }
 
-        double archonCount = rc.getArchonCount();
-        double turnIndex = sharedArray.getArchonTurnIndex();
-        if (!RandomUtils.chance((turnIndex + 1) / archonCount)) {
-            return;
-        }
+        removeInvalidDangerTargets();
+        lookForDangerTargets();
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {
             tryBuildRobot(RobotType.SOLDIER);
             return;
         }
 
-        if (leadingMiners > 0) {
-            if (tryBuildRobot(RobotType.MINER)) {
-                leadingMiners--;
-            }
+        double archonCount = rc.getArchonCount();
+        double turnIndex = sharedArray.getArchonTurnIndex();
+        if (!RandomUtils.chance((turnIndex + 1) / archonCount)) {
+            return;
+        }
 
+        boolean hasDangerTargets = false;
+        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
+            if (sharedArray.getDangerTarget(i) != null) {
+                hasDangerTargets = true;
+                break;
+            }
+        }
+
+        if (!hasDangerTargets) {
+            tryBuildRobot(RobotType.MINER);
             return;
         }
 

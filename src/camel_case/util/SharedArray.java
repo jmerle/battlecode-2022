@@ -5,6 +5,8 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 
 public class SharedArray {
+    public static final int MAX_DANGER_TARGETS = 20;
+
     private RobotController rc;
 
     public SharedArray(RobotController rc) {
@@ -12,30 +14,27 @@ public class SharedArray {
     }
 
     public MapLocation getMyArchonLocation(int archonIndex) throws GameActionException {
-        int value = rc.readSharedArray(archonIndex);
-        return value > 0 ? intToLocation(value) : null;
+        return readLocation(archonIndex);
     }
 
     public void setMyArchonLocation(int archonIndex, MapLocation location) throws GameActionException {
-        write(archonIndex, locationToInt(location));
+        writeLocation(archonIndex, location);
     }
 
     public MapLocation getEnemyArchonLocation(int archonIndex) throws GameActionException {
-        int value = rc.readSharedArray(archonIndex + 5);
-        return value > 0 ? intToLocation(value) : null;
+        return readLocation(archonIndex + 5);
     }
 
     public void setEnemyArchonLocation(int archonIndex, MapLocation location) throws GameActionException {
-        write(archonIndex + 5, location != null ? locationToInt(location) : 0);
+        writeLocation(archonIndex + 5, location);
     }
 
     public MapLocation getPossibleEnemyArchonLocation(int index) throws GameActionException {
-        int value = rc.readSharedArray(index + 10);
-        return value > 0 ? intToLocation(value) : null;
+        return readLocation(index + 10);
     }
 
     public void setPossibleEnemyArchonLocation(int index, MapLocation location) throws GameActionException {
-        write(index + 10, location != null ? locationToInt(location) : 0);
+        writeLocation(index + 10, location);
     }
 
     public int getArchonTurnIndex() throws GameActionException {
@@ -51,16 +50,25 @@ public class SharedArray {
         }
     }
 
+    public MapLocation getDangerTarget(int index) throws GameActionException {
+        return readLocation(index + 26);
+    }
+
+    public void setDangerTarget(int index, MapLocation location) throws GameActionException {
+        writeLocation(index + 26, location);
+    }
+
     public int archonIdToIndex(int id) {
         return id % 2 == 0 ? id / 2 : (id - 1) / 2;
     }
 
-    private int locationToInt(MapLocation location) {
-        return (location.y * 60 + location.x) + 1;
+    private MapLocation readLocation(int index) throws GameActionException {
+        int value = rc.readSharedArray(index);
+        return value > 0 ? new MapLocation((value - 1) % 60, (value - 1) / 60) : null;
     }
 
-    private MapLocation intToLocation(int n) {
-        return new MapLocation((n - 1) % 60, (n - 1) / 60);
+    private void writeLocation(int index, MapLocation location) throws GameActionException {
+        write(index, location != null ? (location.y * 60 + location.x) + 1 : 0);
     }
 
     private void write(int index, int newValue) throws GameActionException {

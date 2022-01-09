@@ -20,6 +20,8 @@ public class Builder extends Droid {
     public void run() throws GameActionException {
         super.run();
 
+        lookForDangerTargets();
+
         if (archonLocation == null) {
             for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, myTeam)) {
                 if (robot.type == RobotType.ARCHON) {

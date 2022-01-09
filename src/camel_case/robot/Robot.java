@@ -80,10 +80,35 @@ public abstract class Robot {
 
     protected boolean tryAttack(RobotInfo robot) throws GameActionException {
         if (rc.canAttack(robot.location)) {
-            rc.attack(robot.location);
+            if (!me.isBuilding()) {
+                if (robot.type.isBuilding()) {
+                    tryMoveTo(robot.location);
+                } else {
+                    int currentRubble = rc.senseRubble(rc.getLocation());
 
-            if (!me.isBuilding() && robot.type.isBuilding()) {
-                tryMoveTo(robot.location);
+                    for (Direction direction : adjacentDirections) {
+                        if (!rc.canMove(direction)) {
+                            continue;
+                        }
+
+                        MapLocation newLocation = rc.adjacentLocation(direction);
+                        if (newLocation.distanceSquaredTo(robot.location) > me.actionRadiusSquared) {
+                            continue;
+                        }
+
+                        if (rc.senseRubble(newLocation) >= currentRubble) {
+                            continue;
+                        }
+
+                        if (tryMove(direction)) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
             }
 
             return true;

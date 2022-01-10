@@ -72,8 +72,7 @@ public class Miner extends Droid {
         int maxResources = Integer.MIN_VALUE;
 
         for (MapLocation option : options) {
-            int distance = myLocation.distanceSquaredTo(option);
-            if (distance == 0) {
+            if (option.equals(myLocation)) {
                 tryMine.apply(option);
                 return true;
             }

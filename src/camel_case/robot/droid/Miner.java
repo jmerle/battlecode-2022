@@ -41,18 +41,22 @@ public class Miner extends Droid {
         }
 
         if (tryMine(rc.senseNearbyLocationsWithGold(), this::senseGold, this::tryMineGold)) {
+            tryMineLeadAllDirections();
             return;
         }
 
         if (tryMine(rc.senseNearbyLocationsWithLead(2, 2), this::senseLead, this::tryMineLead)) {
+            tryMineLeadAllDirections();
             return;
         }
 
         if (tryMine(rc.senseNearbyLocationsWithLead(me.visionRadiusSquared, 2), this::senseLead, this::tryMineLead)) {
+            tryMineLeadAllDirections();
             return;
         }
 
         tryWander();
+        tryMineLeadAllDirections();
     }
 
     private boolean tryMine(MapLocation[] options,
@@ -137,5 +141,14 @@ public class Miner extends Droid {
         }
 
         return true;
+    }
+
+    private void tryMineLeadAllDirections() throws GameActionException {
+        for (Direction direction : adjacentDirections) {
+            MapLocation location = rc.adjacentLocation(direction);
+            while (rc.canMineLead(location) && rc.senseLead(location) > 1) {
+                rc.mineLead(location);
+            }
+        }
     }
 }

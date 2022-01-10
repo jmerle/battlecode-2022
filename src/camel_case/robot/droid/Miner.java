@@ -7,6 +7,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
+import camel_case.util.BattlecodeFunction;
 
 public class Miner extends Droid {
     private MapLocation archonLocation = null;
@@ -31,46 +32,69 @@ public class Miner extends Droid {
         }
 
         MapLocation myLocation = rc.getLocation();
-
-        MapLocation closestTarget = null;
-        int minDistance = Integer.MAX_VALUE;
-
-        for (MapLocation location : rc.senseNearbyLocationsWithGold(me.visionRadiusSquared)) {
-            int distance = myLocation.distanceSquaredTo(location);
-            if (distance <= 2) {
-                tryMineGold(location);
-                return;
-            }
-
-            if (distance < minDistance) {
-                closestTarget = location;
-                minDistance = distance;
+        if (archonLocation != null && myLocation.isAdjacentTo(archonLocation)) {
+            for (Direction direction : adjacentDirections) {
+                if (!rc.adjacentLocation(direction).isAdjacentTo(archonLocation) && tryMove(direction)) {
+                    break;
+                }
             }
         }
 
-        if (closestTarget != null) {
-            tryMoveTo(closestTarget);
+        if (tryMine(rc.senseNearbyLocationsWithGold(), this::senseGold, this::tryMineGold)) {
             return;
         }
 
-        for (MapLocation location : rc.senseNearbyLocationsWithLead(me.visionRadiusSquared, 2)) {
-            int distance = myLocation.distanceSquaredTo(location);
-            if (distance <= 2) {
-                tryMineLead(location);
-                return;
+        if (tryMine(rc.senseNearbyLocationsWithLead(2, 2), this::senseLead, this::tryMineLead)) {
+            return;
+        }
+
+        if (tryMine(rc.senseNearbyLocationsWithLead(me.visionRadiusSquared, 2), this::senseLead, this::tryMineLead)) {
+            return;
+        }
+
+        tryWander();
+    }
+
+    private boolean tryMine(MapLocation[] options,
+                            BattlecodeFunction<MapLocation, Integer> senseResources,
+                            BattlecodeFunction<MapLocation, Boolean> tryMine) throws GameActionException {
+        if (options.length == 0) {
+            return false;
+        }
+
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation bestOption = null;
+        int maxResources = Integer.MIN_VALUE;
+
+        for (MapLocation option : options) {
+            int distance = myLocation.distanceSquaredTo(option);
+            if (distance == 0) {
+                tryMine.apply(option);
+                return true;
             }
 
-            if (distance <= minDistance) {
-                closestTarget = location;
-                minDistance = distance;
+            int resources = senseResources.apply(option);
+            if (resources > maxResources) {
+                bestOption = option;
+                maxResources = resources;
             }
         }
 
-        if (closestTarget != null) {
-            tryMoveTo(closestTarget);
-        } else {
-            tryWander();
+        if (bestOption != null) {
+            if (archonLocation == null || !bestOption.isAdjacentTo(archonLocation) || !myLocation.isAdjacentTo(bestOption)) {
+                tryMoveTo(bestOption);
+            }
+
+            tryMine.apply(bestOption);
+            return true;
         }
+
+        return false;
+    }
+
+    private int senseGold(MapLocation location) throws GameActionException {
+        return rc.senseGold(location);
     }
 
     private boolean tryMineGold(MapLocation location) throws GameActionException {
@@ -82,11 +106,22 @@ public class Miner extends Droid {
             rc.mineGold(location);
         }
 
+        for (Direction direction : adjacentDirections) {
+            MapLocation adjacentLocation = rc.adjacentLocation(direction);
+            while (rc.canMineGold(adjacentLocation)) {
+                rc.mineGold(adjacentLocation);
+            }
+        }
+
         return true;
     }
 
+    private int senseLead(MapLocation location) throws GameActionException {
+        return rc.senseLead(location);
+    }
+
     private boolean tryMineLead(MapLocation location) throws GameActionException {
-        if (!rc.canMineLead(location) || rc.senseLead(location) <= 1) {
+        if (!rc.canMineLead(location)) {
             return false;
         }
 
@@ -95,15 +130,9 @@ public class Miner extends Droid {
         }
 
         for (Direction direction : adjacentDirections) {
-            tryMineLead(rc.adjacentLocation(direction));
-        }
-
-        MapLocation myLocation = rc.getLocation();
-        if (archonLocation != null && myLocation.isAdjacentTo(archonLocation)) {
-            for (Direction direction : adjacentDirections) {
-                if (!myLocation.add(direction).isAdjacentTo(archonLocation) && tryMove(direction)) {
-                    break;
-                }
+            MapLocation adjacentLocation = rc.adjacentLocation(direction);
+            while (rc.canMineLead(adjacentLocation) && rc.senseLead(adjacentLocation) > 1) {
+                rc.mineLead(adjacentLocation);
             }
         }
 

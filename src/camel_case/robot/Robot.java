@@ -111,6 +111,13 @@ public abstract class Robot {
 
             if (rc.canAttack(robot.location)) {
                 rc.attack(robot.location);
+
+                if (robot.type == RobotType.ARCHON) {
+                    RobotInfo newRobot = rc.senseRobotAtLocation(robot.location);
+                    if (newRobot == null || newRobot.team == myTeam || newRobot.type != RobotType.ARCHON) {
+                        sharedArray.setEnemyArchonLocation(sharedArray.archonIdToIndex(robot.ID), null);
+                    }
+                }
             }
 
             return true;

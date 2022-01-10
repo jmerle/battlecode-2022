@@ -16,7 +16,6 @@ public class Soldier extends Droid {
     public void run() throws GameActionException {
         super.run();
 
-        removeInvalidDangerTargets();
         lookForDangerTargets();
 
         RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);

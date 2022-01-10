@@ -40,11 +40,11 @@ public abstract class Robot {
     private int[] attackPriorities = {
             4, // Archon
             3, // Laboratory
-            7, // Watchtower
+            5, // Watchtower
             2, // Miner
             1, // Builder
-            5, // Soldier
-            6 // Sage
+            6, // Soldier
+            7 // Sage
     };
 
     private int[] possibleEnemyArchonIndices;
@@ -206,23 +206,12 @@ public abstract class Robot {
             }
         }
 
-        if (enemyCount > 0 && enemyCount >= defenderCount) {
+        if (enemyCount > 0 && enemyCount * 2 > defenderCount) {
             for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
-                if (sharedArray.getDangerTarget(i) == null) {
+                MapLocation dangerTarget = sharedArray.getDangerTarget(i);
+                if (dangerTarget == null || dangerTarget.equals(closestTarget)) {
                     sharedArray.setDangerTarget(i, closestTarget);
                     break;
-                }
-            }
-        }
-    }
-
-    protected void removeInvalidDangerTargets() throws GameActionException {
-        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
-            MapLocation target = sharedArray.getDangerTarget(i);
-            if (target != null && rc.canSenseLocation(target)) {
-                RobotInfo robot = rc.senseRobotAtLocation(target);
-                if (robot == null || robot.team == myTeam) {
-                    sharedArray.setDangerTarget(i, null);
                 }
             }
         }

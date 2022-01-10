@@ -59,7 +59,10 @@ public class Archon extends Building {
             isFirstRun = false;
         }
 
-        removeInvalidDangerTargets();
+        if (turnIndex == 0) {
+            sharedArray.expireDangerTargets();
+        }
+
         lookForDangerTargets();
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {

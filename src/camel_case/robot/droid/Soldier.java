@@ -24,15 +24,38 @@ public class Soldier extends Droid {
             return;
         }
 
+        RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
+        if (visibleTarget != null) {
+            tryMoveTo(visibleTarget.location);
+            tryAttack(visibleTarget);
+            return;
+        }
+
         MapLocation dangerTarget = getClosestDangerTarget();
         if (dangerTarget != null) {
             tryMoveTo(dangerTarget);
+
+            if (rc.canSenseLocation(dangerTarget)) {
+                RobotInfo robot = rc.senseRobotAtLocation(dangerTarget);
+                if (robot != null) {
+                    tryAttack(robot);
+                }
+            }
+
             return;
         }
 
         MapLocation archonTarget = getArchonTarget();
         if (archonTarget != null) {
             tryMoveTo(archonTarget);
+
+            if (rc.canSenseLocation(archonTarget)) {
+                RobotInfo robot = rc.senseRobotAtLocation(archonTarget);
+                if (robot != null) {
+                    tryAttack(robot);
+                }
+            }
+
             return;
         }
 

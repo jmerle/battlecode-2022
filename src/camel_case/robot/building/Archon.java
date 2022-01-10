@@ -90,7 +90,7 @@ public class Archon extends Building {
             return;
         }
 
-        if (rc.getTeamLeadAmount(myTeam) < 500) {
+        if (rc.getTeamLeadAmount(myTeam) < 300) {
             while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER) {
                 spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
             }

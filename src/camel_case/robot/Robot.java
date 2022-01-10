@@ -182,31 +182,42 @@ public abstract class Robot {
     }
 
     protected void lookForDangerTargets() throws GameActionException {
-        int defenderCount = me.canAttack() ? 1 : 0;
-        int enemyCount = 0;
-
         MapLocation myLocation = rc.getLocation();
+        RobotInfo[] nearbyRobots = rc.senseNearbyRobots();
+
+        int enemyCount = 0;
 
         MapLocation closestTarget = null;
         int minDistance = Integer.MAX_VALUE;
 
-        for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared)) {
-            if (robot.team == myTeam) {
-                if (robot.type.canAttack()) {
-                    defenderCount++;
-                }
-            } else {
-                enemyCount++;
+        for (RobotInfo robot : nearbyRobots) {
+            if (robot.team != enemyTeam) {
+                continue;
+            }
 
-                int distance = myLocation.distanceSquaredTo(robot.location);
-                if (distance < minDistance) {
-                    closestTarget = robot.location;
-                    minDistance = distance;
-                }
+            enemyCount++;
+
+            int distance = myLocation.distanceSquaredTo(robot.location);
+            if (distance < minDistance) {
+                closestTarget = robot.location;
+                minDistance = distance;
             }
         }
 
-        if (enemyCount > 0 && enemyCount * 2 > defenderCount) {
+        if (closestTarget == null) {
+            return;
+        }
+
+        int defenderCount = me.canAttack() ? 1 : 0;
+        for (RobotInfo robot : nearbyRobots) {
+            if (robot.team == myTeam
+                    && robot.type.canAttack()
+                    && robot.location.distanceSquaredTo(closestTarget) <= robot.type.actionRadiusSquared) {
+                defenderCount++;
+            }
+        }
+
+        if (enemyCount > defenderCount) {
             for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
                 MapLocation dangerTarget = sharedArray.getDangerTarget(i);
                 if (dangerTarget == null || dangerTarget.equals(closestTarget)) {

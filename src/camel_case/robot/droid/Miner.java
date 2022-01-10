@@ -53,11 +53,7 @@ public class Miner extends Droid {
             return;
         }
 
-        for (MapLocation location : rc.senseNearbyLocationsWithLead(me.visionRadiusSquared)) {
-            if (rc.senseLead(location) == 1) {
-                continue;
-            }
-
+        for (MapLocation location : rc.senseNearbyLocationsWithLead(me.visionRadiusSquared, 2)) {
             int distance = myLocation.distanceSquaredTo(location);
             if (distance <= 2) {
                 tryMineLead(location);

@@ -25,40 +25,39 @@ public class Soldier extends Droid {
         }
 
         RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
-        if (visibleTarget != null) {
-            tryMoveTo(visibleTarget.location);
-            tryAttack(visibleTarget);
+        if (visibleTarget != null && tryMoveToAndAttack(visibleTarget.location)) {
             return;
         }
 
-        MapLocation dangerTarget = getClosestDangerTarget();
-        if (dangerTarget != null) {
-            tryMoveTo(dangerTarget);
-
-            if (rc.canSenseLocation(dangerTarget)) {
-                RobotInfo robot = rc.senseRobotAtLocation(dangerTarget);
-                if (robot != null) {
-                    tryAttack(robot);
-                }
-            }
-
+        if (tryMoveToAndAttack(getClosestDangerTarget())) {
             return;
         }
 
-        MapLocation archonTarget = getArchonTarget();
-        if (archonTarget != null) {
-            tryMoveTo(archonTarget);
+        if (tryMoveToAndAttack(getArchonTarget())) {
+            return;
+        }
 
-            if (rc.canSenseLocation(archonTarget)) {
-                RobotInfo robot = rc.senseRobotAtLocation(archonTarget);
-                if (robot != null) {
-                    tryAttack(robot);
-                }
-            }
-
+        if (tryMoveToAndAttack(getPossibleArchonTarget())) {
             return;
         }
 
         tryWander();
+    }
+
+    private boolean tryMoveToAndAttack(MapLocation location) throws GameActionException {
+        if (location == null) {
+            return false;
+        }
+
+        tryMoveTo(location);
+
+        if (rc.canSenseLocation(location)) {
+            RobotInfo robot = rc.senseRobotAtLocation(location);
+            if (robot != null) {
+                tryAttack(robot);
+            }
+        }
+
+        return true;
     }
 }

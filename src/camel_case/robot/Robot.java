@@ -47,8 +47,6 @@ public abstract class Robot {
             7 // Sage
     };
 
-    private int[] possibleEnemyArchonIndices;
-
     private MapLocation previousMoveToTarget;
     private Direction previousMoveToDirection;
 
@@ -147,6 +145,10 @@ public abstract class Robot {
 
     protected MapLocation getArchonTarget() throws GameActionException {
         MapLocation myLocation = rc.getLocation();
+
+        MapLocation bestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
         for (int i = 0; i < 5; i++) {
             MapLocation archon = sharedArray.getEnemyArchonLocation(i);
             if (archon == null) {
@@ -158,34 +160,41 @@ public abstract class Robot {
                 continue;
             }
 
-            return archon;
-        }
-
-        if (possibleEnemyArchonIndices == null) {
-            possibleEnemyArchonIndices = new int[15];
-
-            for (int i = 0; i < 15; i++) {
-                possibleEnemyArchonIndices[i] = i;
+            int distance = myLocation.distanceSquaredTo(archon);
+            if (distance < minDistance) {
+                bestTarget = archon;
+                minDistance = distance;
             }
-
-            ArrayUtils.shuffle(possibleEnemyArchonIndices);
         }
 
-        for (int index : possibleEnemyArchonIndices) {
-            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(index);
+        return bestTarget;
+    }
+
+    protected MapLocation getPossibleArchonTarget() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation bestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int i = 0; i < 15; i++) {
+            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(i);
             if (possibleEnemyArchon == null) {
                 continue;
             }
 
             if (rc.canSenseLocation(possibleEnemyArchon)) {
-                sharedArray.setPossibleEnemyArchonLocation(index, null);
+                sharedArray.setPossibleEnemyArchonLocation(i, null);
                 continue;
             }
 
-            return possibleEnemyArchon;
+            int distance = myLocation.distanceSquaredTo(possibleEnemyArchon);
+            if (distance < minDistance) {
+                bestTarget = possibleEnemyArchon;
+                minDistance = distance;
+            }
         }
 
-        return null;
+        return bestTarget;
     }
 
     protected void lookForDangerTargets() throws GameActionException {

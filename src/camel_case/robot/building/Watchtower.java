@@ -51,6 +51,12 @@ public class Watchtower extends Building {
             return;
         }
 
+        MapLocation possibleArchonTarget = getPossibleArchonTarget();
+        if (possibleArchonTarget != null) {
+            tryMoveTo(possibleArchonTarget);
+            return;
+        }
+
         tryWander();
     }
 }

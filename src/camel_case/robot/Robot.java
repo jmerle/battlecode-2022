@@ -47,6 +47,8 @@ public abstract class Robot {
             7 // Sage
     };
 
+    private int[] possibleEnemyArchonIndices;
+
     private MapLocation previousMoveToTarget;
     private Direction previousMoveToDirection;
 
@@ -146,9 +148,6 @@ public abstract class Robot {
     protected MapLocation getArchonTarget() throws GameActionException {
         MapLocation myLocation = rc.getLocation();
 
-        MapLocation bestTarget = null;
-        int minDistance = Integer.MAX_VALUE;
-
         for (int i = 0; i < 5; i++) {
             MapLocation archon = sharedArray.getEnemyArchonLocation(i);
             if (archon == null) {
@@ -160,41 +159,38 @@ public abstract class Robot {
                 continue;
             }
 
-            int distance = myLocation.distanceSquaredTo(archon);
-            if (distance < minDistance) {
-                bestTarget = archon;
-                minDistance = distance;
-            }
+            return archon;
         }
 
-        return bestTarget;
+        return null;
     }
 
     protected MapLocation getPossibleArchonTarget() throws GameActionException {
-        MapLocation myLocation = rc.getLocation();
+        if (possibleEnemyArchonIndices == null) {
+            possibleEnemyArchonIndices = new int[15];
 
-        MapLocation bestTarget = null;
-        int minDistance = Integer.MAX_VALUE;
+            for (int i = 0; i < 15; i++) {
+                possibleEnemyArchonIndices[i] = i;
+            }
 
-        for (int i = 0; i < 15; i++) {
-            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(i);
+            ArrayUtils.shuffle(possibleEnemyArchonIndices);
+        }
+
+        for (int index : possibleEnemyArchonIndices) {
+            MapLocation possibleEnemyArchon = sharedArray.getPossibleEnemyArchonLocation(index);
             if (possibleEnemyArchon == null) {
                 continue;
             }
 
             if (rc.canSenseLocation(possibleEnemyArchon)) {
-                sharedArray.setPossibleEnemyArchonLocation(i, null);
+                sharedArray.setPossibleEnemyArchonLocation(index, null);
                 continue;
             }
 
-            int distance = myLocation.distanceSquaredTo(possibleEnemyArchon);
-            if (distance < minDistance) {
-                bestTarget = possibleEnemyArchon;
-                minDistance = distance;
-            }
+            return possibleEnemyArchon;
         }
 
-        return bestTarget;
+        return null;
     }
 
     protected void lookForDangerTargets() throws GameActionException {
@@ -264,6 +260,44 @@ public abstract class Robot {
         }
 
         return closestTarget;
+    }
+
+    protected void lookForMinerTargets() throws GameActionException {
+        MapLocation[] locations = rc.senseNearbyLocationsWithLead(me.visionRadiusSquared, 10);
+        int totalResources = 0;
+
+        for (MapLocation location : locations) {
+            totalResources += rc.senseLead(location);
+        }
+
+        if (totalResources < 100) {
+            return;
+        }
+
+        outer:
+        for (MapLocation location : locations) {
+            for (int i = 0; i < SharedArray.MAX_MINER_TARGETS; i++) {
+                if (sharedArray.getMinerTarget(i) == null) {
+                    sharedArray.setMinerTarget(i, location);
+                    continue outer;
+                }
+            }
+
+            break;
+        }
+    }
+
+    protected void expireMinerTargets() throws GameActionException {
+        for (int i = 0; i < SharedArray.MAX_MINER_TARGETS; i++) {
+            MapLocation location = sharedArray.getMinerTarget(i);
+            if (location == null) {
+                continue;
+            }
+
+            if (rc.canSenseLocation(location) && rc.senseLead(location) < 20) {
+                sharedArray.setMinerTarget(i, null);
+            }
+        }
     }
 
     protected boolean tryMove(Direction direction) throws GameActionException {

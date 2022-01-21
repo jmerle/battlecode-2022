@@ -61,9 +61,11 @@ public class Archon extends Building {
 
         if (turnIndex == 0) {
             sharedArray.expireDangerTargets();
+            expireMinerTargets();
         }
 
         lookForDangerTargets();
+        lookForMinerTargets();
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {
             tryBuildRobot(RobotType.SOLDIER);

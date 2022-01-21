@@ -6,6 +6,7 @@ import battlecode.common.RobotController;
 
 public class SharedArray {
     public static final int MAX_DANGER_TARGETS = 20;
+    public static final int MAX_MINER_TARGETS = 15;
 
     private RobotController rc;
 
@@ -68,6 +69,14 @@ public class SharedArray {
                 write(i + 26, 0);
             }
         }
+    }
+
+    public MapLocation getMinerTarget(int index) throws GameActionException {
+        return readLocation(index + 26 + MAX_DANGER_TARGETS);
+    }
+
+    public void setMinerTarget(int index, MapLocation location) throws GameActionException {
+        writeLocation(index + 26 + MAX_DANGER_TARGETS, location);
     }
 
     public int archonIdToIndex(int id) {

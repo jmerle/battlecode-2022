@@ -17,6 +17,9 @@ public class Watchtower extends Building {
     public void run() throws GameActionException {
         super.run();
 
+        lookForDangerTargets();
+        lookForMinerTargets();
+
         RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
         if (attackTarget != null) {
             if (rc.getMode() == RobotMode.PORTABLE) {

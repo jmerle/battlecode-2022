@@ -8,6 +8,7 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
 import camel_case.util.BattlecodeFunction;
+import camel_case.util.SharedArray;
 
 public class Miner extends Droid {
     private MapLocation archonLocation = null;
@@ -21,6 +22,8 @@ public class Miner extends Droid {
         super.run();
 
         lookForDangerTargets();
+        lookForMinerTargets();
+        expireMinerTargets();
 
         if (archonLocation == null) {
             for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, myTeam)) {
@@ -51,6 +54,11 @@ public class Miner extends Droid {
         }
 
         if (tryMine(rc.senseNearbyLocationsWithLead(me.visionRadiusSquared, 2), this::senseLead, this::tryMineLead)) {
+            tryMineLeadAllDirections();
+            return;
+        }
+
+        if (tryMoveToMinerTarget()) {
             tryMineLeadAllDirections();
             return;
         }
@@ -149,5 +157,33 @@ public class Miner extends Droid {
                 rc.mineLead(location);
             }
         }
+    }
+
+    private boolean tryMoveToMinerTarget() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation bestTarget = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int i = 0; i < SharedArray.MAX_MINER_TARGETS; i++) {
+            MapLocation target = sharedArray.getMinerTarget(i);
+            if (target == null) {
+                continue;
+            }
+
+            int distance = myLocation.distanceSquaredTo(target);
+            if (distance < minDistance) {
+                bestTarget = target;
+                minDistance = distance;
+            }
+        }
+
+        if (bestTarget != null) {
+            rc.setIndicatorString(bestTarget.toString());
+            tryMoveTo(bestTarget);
+            return true;
+        }
+
+        return false;
     }
 }

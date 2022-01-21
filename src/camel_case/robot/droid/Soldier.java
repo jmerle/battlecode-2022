@@ -17,6 +17,7 @@ public class Soldier extends Droid {
         super.run();
 
         lookForDangerTargets();
+        lookForMinerTargets();
 
         RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
         if (attackTarget != null) {

@@ -42,7 +42,7 @@ public class Miner extends Droid {
 
         RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
         if (visibleTarget != null && visibleTarget.type.canAttack()) {
-            tryMoveAway(visibleTarget.location);
+            tryMoveToSafety();
             tryMineLeadAllDirections();
             return;
         }

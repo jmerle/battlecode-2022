@@ -119,7 +119,7 @@ public abstract class Robot {
             }
 
             if (robot.type.canAttack() && rc.isMovementReady()) {
-                tryMoveAway(robot.location);
+                tryMoveToSafety();
             }
 
             return true;
@@ -367,12 +367,19 @@ public abstract class Robot {
         return tryMoveTo(currentWanderTarget);
     }
 
-    protected boolean tryMoveAway(MapLocation location) throws GameActionException {
+    protected boolean tryMoveToSafety() throws GameActionException {
         MapLocation myLocation = rc.getLocation();
+        RobotInfo[] enemyRobots = rc.senseNearbyRobots(me.visionRadiusSquared, enemyTeam);
 
         Direction bestDirection = null;
-        int maxDistance = myLocation.distanceSquaredTo(location);
         int minRubble = rc.senseRubble(myLocation);
+
+        int maxDistance = 0;
+        for (RobotInfo robot : enemyRobots) {
+            if (robot.type.canAttack()) {
+                maxDistance += myLocation.distanceSquaredTo(robot.location);
+            }
+        }
 
         for (Direction direction : adjacentDirections) {
             if (!rc.canMove(direction)) {
@@ -380,10 +387,19 @@ public abstract class Robot {
             }
 
             MapLocation newLocation = rc.adjacentLocation(direction);
-            int distance = newLocation.distanceSquaredTo(location);
             int rubble = rc.senseRubble(newLocation);
-            if ((distance > maxDistance && (rubble < minRubble || Math.abs(rubble - minRubble) <= 20))
-                    || (distance == maxDistance && rubble < minRubble)) {
+            if (Math.abs(rubble - minRubble) > 20) {
+                continue;
+            }
+
+            int distance = 0;
+            for (RobotInfo robot : enemyRobots) {
+                if (robot.type.canAttack()) {
+                    distance += newLocation.distanceSquaredTo(robot.location);
+                }
+            }
+
+            if ((distance > maxDistance && rubble <= minRubble) || (distance == maxDistance && rubble < minRubble)) {
                 bestDirection = direction;
                 maxDistance = distance;
                 minRubble = rubble;
@@ -418,7 +434,7 @@ public abstract class Robot {
         }
 
         if (bestArchon != null) {
-            if (minDistance > 9) {
+            if (minDistance > 20) {
                 tryMoveTo(bestArchon);
             } else {
                 tryMoveRandom();

@@ -18,7 +18,8 @@ public class Soldier extends Droid {
 
         lookForDangerTargets();
 
-        if (rc.getHealth() < 10) {
+        int myHealth = rc.getHealth();
+        if (myHealth < 10 || (myHealth < 16 && distanceToArchon() < 34)) {
             tryMoveToArchon();
         }
 
@@ -68,5 +69,25 @@ public class Soldier extends Droid {
         }
 
         return true;
+    }
+
+    private int distanceToArchon() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int i = 0; i < 5; i++) {
+            MapLocation archon = sharedArray.getMyArchonLocation(i);
+            if (archon == null) {
+                continue;
+            }
+
+            int distance = myLocation.distanceSquaredTo(archon);
+            if (distance < minDistance) {
+                minDistance = distance;
+            }
+        }
+
+        return minDistance;
     }
 }

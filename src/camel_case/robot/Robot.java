@@ -382,7 +382,8 @@ public abstract class Robot {
             MapLocation newLocation = rc.adjacentLocation(direction);
             int distance = newLocation.distanceSquaredTo(location);
             int rubble = rc.senseRubble(newLocation);
-            if (distance > maxDistance || (distance == maxDistance && rubble < minRubble)) {
+            if ((distance > maxDistance && (rubble < minRubble || Math.abs(rubble - minRubble) <= 5))
+                    || (distance == maxDistance && rubble < minRubble)) {
                 bestDirection = direction;
                 maxDistance = distance;
                 minRubble = rubble;

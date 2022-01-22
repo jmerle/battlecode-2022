@@ -9,6 +9,8 @@ import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
 import camel_case.util.BattlecodeFunction;
 
+import java.util.Arrays;
+
 public class Miner extends Droid {
     private MapLocation archonLocation = null;
 
@@ -73,21 +75,67 @@ public class Miner extends Droid {
             return false;
         }
 
+        int[] resourcesByOption = new int[options.length];
+        for (int i = 0; i < options.length; i++) {
+            resourcesByOption[i] = senseResources.apply(options[i]);
+        }
+
         MapLocation myLocation = rc.getLocation();
+
+        int[] minersRequiredByOption = new int[options.length];
+        Arrays.fill(minersRequiredByOption, 2);
+
+        for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, myTeam)) {
+            if (robot.type != RobotType.MINER) {
+                continue;
+            }
+
+            int bestIndex = -1;
+            int maxResources = Integer.MIN_VALUE;
+            int minDistance = Integer.MAX_VALUE;
+
+            for (int i = 0; i < options.length; i++) {
+                if (minersRequiredByOption[i] == 0) {
+                    continue;
+                }
+
+                if (options[i].equals(robot.location)) {
+                    bestIndex = i;
+                    break;
+                }
+
+                int distance = robot.location.distanceSquaredTo(options[i]);
+                if (resourcesByOption[i] > maxResources || (resourcesByOption[i] == maxResources && distance < minDistance)) {
+                    bestIndex = i;
+                    maxResources = resourcesByOption[i];
+                    minDistance = distance;
+                }
+            }
+
+            if (bestIndex > -1) {
+                minersRequiredByOption[bestIndex]--;
+            }
+        }
 
         MapLocation bestOption = null;
         int maxResources = Integer.MIN_VALUE;
+        int minDistance = Integer.MAX_VALUE;
 
-        for (MapLocation option : options) {
-            if (option.equals(myLocation)) {
-                tryMine.apply(option);
+        for (int i = 0; i < options.length; i++) {
+            if (minersRequiredByOption[i] == 0) {
+                continue;
+            }
+
+            if (options[i].equals(myLocation)) {
+                tryMine.apply(options[i]);
                 return true;
             }
 
-            int resources = senseResources.apply(option);
-            if (resources > maxResources) {
-                bestOption = option;
-                maxResources = resources;
+            int distance = myLocation.distanceSquaredTo(options[i]);
+            if (resourcesByOption[i] > maxResources || (resourcesByOption[i] == maxResources && distance < minDistance)) {
+                bestOption = options[i];
+                maxResources = resourcesByOption[i];
+                minDistance = distance;
             }
         }
 

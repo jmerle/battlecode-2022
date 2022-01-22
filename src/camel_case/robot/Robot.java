@@ -434,7 +434,7 @@ public abstract class Robot {
         }
 
         if (bestArchon != null) {
-            if (minDistance > 20) {
+            if (minDistance > 9) {
                 tryMoveTo(bestArchon);
             } else {
                 tryMoveRandom();

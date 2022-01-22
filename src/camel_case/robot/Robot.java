@@ -118,6 +118,10 @@ public abstract class Robot {
                 }
             }
 
+            if (robot.type.canAttack() && rc.isMovementReady()) {
+                tryMoveAway(robot.location);
+            }
+
             return true;
         }
 
@@ -125,11 +129,19 @@ public abstract class Robot {
     }
 
     protected RobotInfo getAttackTarget(int radius) {
+        return getAttackTarget(radius, enemyTeam);
+    }
+
+    protected RobotInfo getRepairTarget(int radius) {
+        return getAttackTarget(radius, myTeam);
+    }
+
+    private RobotInfo getAttackTarget(int radius, Team targetTeam) {
         RobotInfo bestTarget = null;
         int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
 
-        for (RobotInfo robot : rc.senseNearbyRobots(radius, enemyTeam)) {
+        for (RobotInfo robot : rc.senseNearbyRobots(radius, targetTeam)) {
             int priority = attackPriorities[robot.type.ordinal()];
             if (bestTarget == null
                     || priority > maxPriority
@@ -353,5 +365,65 @@ public abstract class Robot {
         }
 
         return tryMoveTo(currentWanderTarget);
+    }
+
+    protected boolean tryMoveAway(MapLocation location) throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        Direction bestDirection = null;
+        int maxDistance = myLocation.distanceSquaredTo(location);
+        int minRubble = rc.senseRubble(myLocation);
+
+        for (Direction direction : adjacentDirections) {
+            if (!rc.canMove(direction)) {
+                continue;
+            }
+
+            MapLocation newLocation = rc.adjacentLocation(direction);
+            int distance = newLocation.distanceSquaredTo(location);
+            int rubble = rc.senseRubble(newLocation);
+            if (distance > maxDistance || (distance == maxDistance && rubble < minRubble)) {
+                bestDirection = direction;
+                maxDistance = distance;
+                minRubble = rubble;
+            }
+        }
+
+        if (bestDirection != null) {
+            tryMove(bestDirection);
+            return true;
+        }
+
+        return false;
+    }
+
+    protected boolean tryMoveToArchon() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        MapLocation bestArchon = null;
+        int minDistance = Integer.MAX_VALUE;
+
+        for (int i = 0; i < 5; i++) {
+            MapLocation archon = sharedArray.getMyArchonLocation(i);
+            if (archon == null) {
+                continue;
+            }
+
+            int distance = myLocation.distanceSquaredTo(archon);
+            if (distance < minDistance) {
+                bestArchon = archon;
+                minDistance = distance;
+            }
+        }
+
+        if (bestArchon != null) {
+            if (minDistance > 9) {
+                tryMoveTo(bestArchon);
+            } else {
+                tryMoveRandom();
+            }
+        }
+
+        return false;
     }
 }

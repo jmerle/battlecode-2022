@@ -18,13 +18,22 @@ public class Soldier extends Droid {
 
         lookForDangerTargets();
 
+        if (rc.getHealth() < 10) {
+            tryMoveToArchon();
+        }
+
+        RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
+        if (visibleTarget != null && visibleTarget.type.canAttack() && !rc.isActionReady()) {
+            tryMoveAway(visibleTarget.location);
+            return;
+        }
+
         RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
         if (attackTarget != null) {
             tryAttack(attackTarget);
             return;
         }
 
-        RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
         if (visibleTarget != null && tryMoveToAndAttack(visibleTarget.location)) {
             return;
         }

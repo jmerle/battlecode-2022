@@ -4,6 +4,7 @@ import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra34;
 import camel_case.util.RandomUtils;
@@ -67,10 +68,12 @@ public class Archon extends Building {
 
         if (getAttackTarget(me.visionRadiusSquared) != null) {
             tryBuildRobot(RobotType.SOLDIER);
+            tryRepair();
             return;
         }
 
         if (!RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+            tryRepair();
             return;
         }
 
@@ -87,6 +90,7 @@ public class Archon extends Building {
                 minersSpawned++;
             }
 
+            tryRepair();
             return;
         }
 
@@ -99,6 +103,8 @@ public class Archon extends Building {
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         }
+
+        tryRepair();
     }
 
     private void setSpawnDirections() {
@@ -174,5 +180,18 @@ public class Archon extends Building {
         }
 
         return false;
+    }
+
+    private void tryRepair() throws GameActionException {
+        if (!rc.isActionReady()) {
+            return;
+        }
+
+        RobotInfo repairTarget = getRepairTarget(me.actionRadiusSquared);
+        if (repairTarget != null
+                && repairTarget.health < repairTarget.type.getMaxHealth(repairTarget.level)
+                && rc.canRepair(repairTarget.location)) {
+            rc.repair(repairTarget.location);
+        }
     }
 }

@@ -40,6 +40,13 @@ public class Miner extends Droid {
             }
         }
 
+        RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
+        if (visibleTarget != null && visibleTarget.type.canAttack()) {
+            tryMoveAway(visibleTarget.location);
+            tryMineLeadAllDirections();
+            return;
+        }
+
         if (tryMine(rc.senseNearbyLocationsWithGold(), this::senseGold, this::tryMineGold)) {
             tryMineLeadAllDirections();
             return;

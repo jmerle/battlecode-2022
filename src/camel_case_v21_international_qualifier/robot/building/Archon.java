@@ -1,0 +1,197 @@
+package camel_case_v21_international_qualifier.robot.building;
+
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
+import camel_case_v21_international_qualifier.dijkstra.Dijkstra34;
+import camel_case_v21_international_qualifier.util.RandomUtils;
+import camel_case_v21_international_qualifier.util.SharedArray;
+
+public class Archon extends Building {
+    private Direction[] spawnDirections;
+
+    private boolean isFirstRun = true;
+
+    private int minersSpawned = 0;
+    private int maxLeadingMiners;
+
+    private RobotType[] spawnOrder = {
+            RobotType.SOLDIER,
+            RobotType.SOLDIER,
+            RobotType.SOLDIER,
+            RobotType.MINER,
+            RobotType.BUILDER
+    };
+
+    private int spawnOrderIndex = 0;
+
+    public Archon(RobotController rc) {
+        super(rc, RobotType.ARCHON, new Dijkstra34(rc));
+
+        setSpawnDirections();
+    }
+
+    @Override
+    public void run() throws GameActionException {
+        super.run();
+
+        int turnIndex = sharedArray.getArchonTurnIndex();
+        int archonCount = rc.getArchonCount();
+
+        if (isFirstRun) {
+            sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
+
+            int knownArchonLocations = 0;
+            for (int i = 0; i < 5; i++) {
+                if (sharedArray.getMyArchonLocation(i) != null) {
+                    knownArchonLocations++;
+                }
+            }
+
+            if (knownArchonLocations == rc.getArchonCount()) {
+                setPossibleEnemyArchonLocations();
+            }
+
+            maxLeadingMiners = Math.max(rc.senseNearbyLocationsWithLead(2).length, 5);
+
+            isFirstRun = false;
+        }
+
+        if (turnIndex == 0) {
+            sharedArray.expireDangerTargets();
+        }
+
+        lookForDangerTargets();
+
+        if (getAttackTarget(me.visionRadiusSquared) != null) {
+            tryBuildRobot(RobotType.SOLDIER);
+            tryRepair();
+            return;
+        }
+
+        if (!RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+            tryRepair();
+            return;
+        }
+
+        boolean hasDangerTargets = false;
+        for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
+            if (sharedArray.getDangerTarget(i) != null) {
+                hasDangerTargets = true;
+                break;
+            }
+        }
+
+        if (!hasDangerTargets && minersSpawned < maxLeadingMiners) {
+            if (tryBuildRobot(RobotType.MINER)) {
+                minersSpawned++;
+            }
+
+            tryRepair();
+            return;
+        }
+
+        if (rc.getTeamLeadAmount(myTeam) < 300) {
+            while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER) {
+                spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
+            }
+        }
+
+        if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
+            spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
+        }
+
+        tryRepair();
+    }
+
+    private void setSpawnDirections() {
+        spawnDirections = new Direction[8];
+
+        MapLocation center = new MapLocation(mapWidth / 2, mapHeight / 2);
+        spawnDirections[0] = rc.getLocation().directionTo(center);
+
+        spawnDirections[1] = spawnDirections[0].rotateLeft();
+        spawnDirections[2] = spawnDirections[0].rotateRight();
+
+        spawnDirections[3] = spawnDirections[1].rotateLeft();
+        spawnDirections[4] = spawnDirections[2].rotateRight();
+
+        spawnDirections[5] = spawnDirections[3].rotateLeft();
+        spawnDirections[6] = spawnDirections[4].rotateRight();
+
+        spawnDirections[7] = spawnDirections[0].opposite();
+    }
+
+    private void setPossibleEnemyArchonLocations() throws GameActionException {
+        MapLocation[] locations = new MapLocation[15];
+
+        for (int i = 0; i < 5; i++) {
+            MapLocation myArchon = sharedArray.getMyArchonLocation(i);
+            if (myArchon == null) {
+                continue;
+            }
+
+            locations[3 * i] = new MapLocation(mapWidth - myArchon.x - 1, myArchon.y);
+            locations[3 * i + 1] = new MapLocation(myArchon.x, mapHeight - myArchon.y - 1);
+            locations[3 * i + 2] = new MapLocation(mapWidth - myArchon.x - 1, mapHeight - myArchon.y - 1);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            MapLocation myArchon = sharedArray.getMyArchonLocation(i);
+            if (myArchon == null) {
+                continue;
+            }
+
+            for (int j = 0; j < 15; j++) {
+                if (myArchon.equals(locations[j])) {
+                    locations[j] = null;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < 15; i++) {
+            if (locations[i] != null) {
+                sharedArray.setPossibleEnemyArchonLocation(i, locations[i]);
+            }
+        }
+    }
+
+    private boolean tryBuildRobot(RobotType type) throws GameActionException {
+        Direction bestDirection = null;
+        int minRubble = Integer.MAX_VALUE;
+
+        for (Direction direction : spawnDirections) {
+            if (rc.canBuildRobot(type, direction)) {
+                int rubble = rc.senseRubble(rc.adjacentLocation(direction));
+                if (rubble < minRubble) {
+                    minRubble = rubble;
+                    bestDirection = direction;
+                }
+            }
+        }
+
+        if (bestDirection != null) {
+            rc.buildRobot(type, bestDirection);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void tryRepair() throws GameActionException {
+        if (!rc.isActionReady()) {
+            return;
+        }
+
+        RobotInfo repairTarget = getRepairTarget(me.actionRadiusSquared);
+        if (repairTarget != null
+                && repairTarget.health < repairTarget.type.getMaxHealth(repairTarget.level)
+                && rc.canRepair(repairTarget.location)) {
+            rc.repair(repairTarget.location);
+        }
+    }
+}

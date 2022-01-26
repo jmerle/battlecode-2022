@@ -41,7 +41,9 @@ fun formatExamplefuncsplayer(content: String): String {
         .replace("e.printStackTrace()", "// e.printStackTrace()") + "\n"
 }
 
-val replayPath = "replays/${project.property("teamA")}-vs-${project.property("teamB")}-on-%MAP%.bc22"
+val replayPath = project.property("replayPath").toString()
+    .replace("%TEAM_A%", project.property("teamA").toString())
+    .replace("%TEAM_B%", project.property("teamB").toString())
 
 val clientType = with(System.getProperty("os.name").toLowerCase()) {
     when {
@@ -132,6 +134,7 @@ task<JavaExec>("run") {
     args = listOf("-c=-")
     jvmArgs = listOf(
         "-Dbc.server.mode=headless",
+        "-Dbc.server.websocket=false",
         "-Dbc.server.map-path=maps",
         "-Dbc.engine.robot-player-to-system-out=${project.property("outputVerbose")}",
         "-Dbc.server.debug=true",

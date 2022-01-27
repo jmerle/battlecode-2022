@@ -103,7 +103,7 @@ public class Archon extends Building {
             return;
         }
 
-        if (!RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+        if (rc.getRoundNum() > 1 && !RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
             tryMoveToOptimalLocation();
             tryRepair();
             return;
@@ -287,6 +287,7 @@ public class Archon extends Building {
             if (rc.getMode() == RobotMode.PORTABLE) {
                 tryMoveTo(optimalLocation);
                 sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
+                setSpawnDirections();
             } else {
                 tryTransform();
             }

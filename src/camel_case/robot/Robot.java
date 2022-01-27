@@ -246,13 +246,25 @@ public abstract class Robot {
         }
 
         if (enemyCount > defenderCount) {
-            for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
-                MapLocation dangerTarget = sharedArray.getDangerTarget(i);
-                if (dangerTarget == null || dangerTarget.equals(closestTarget.location)) {
-                    int expiration = closestTarget.type == RobotType.SAGE ? 10 : 1;
-                    sharedArray.setDangerTarget(i, closestTarget.location, expiration);
-                    break;
+            sharedArray.addDangerTarget(closestTarget.location, 1);
+
+            if (closestTarget.type == RobotType.SAGE) {
+                MapLocation runAwayLocation = closestTarget.location;
+                Direction runAwayDirection = myLocation.directionTo(closestTarget.location);
+
+                for (int j = 0; j < 3; j++) {
+                    MapLocation newRunAwayLocation = runAwayLocation.add(runAwayDirection);
+                    if (newRunAwayLocation.x < 0
+                            || newRunAwayLocation.x >= mapWidth
+                            || newRunAwayLocation.y < 0
+                            || newRunAwayLocation.y >= mapHeight) {
+                        break;
+                    }
+
+                    runAwayLocation = newRunAwayLocation;
                 }
+
+                sharedArray.addDangerTarget(runAwayLocation, 10);
             }
         }
     }

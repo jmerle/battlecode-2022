@@ -38,11 +38,11 @@ public abstract class Robot {
     };
 
     private int[] attackPriorities = {
-            3, // Archon
+            2, // Archon
             6, // Laboratory
             4, // Watchtower
             1, // Miner
-            2, // Builder
+            3, // Builder
             7, // Soldier
             5 // Sage
     };

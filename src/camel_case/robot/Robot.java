@@ -38,13 +38,13 @@ public abstract class Robot {
     };
 
     private int[] attackPriorities = {
-            4, // Archon
-            3, // Laboratory
-            5, // Watchtower
-            2, // Miner
-            1, // Builder
-            6, // Soldier
-            7 // Sage
+            3, // Archon
+            6, // Laboratory
+            4, // Watchtower
+            1, // Miner
+            2, // Builder
+            7, // Soldier
+            5 // Sage
     };
 
     private MapLocation previousMoveToTarget;
@@ -118,7 +118,7 @@ public abstract class Robot {
                 }
             }
 
-            if (robot.type.canAttack() && rc.isMovementReady()) {
+            if (robot.type.canAttack() && rc.isMovementReady() && rc.getHealth() != me.getMaxHealth(rc.getLevel())) {
                 tryMoveToSafety();
             }
 
@@ -415,9 +415,25 @@ public abstract class Robot {
     }
 
     protected boolean tryMoveToArchon() throws GameActionException {
+        MapLocation closestArchon = getClosestArchon();
+
+        if (closestArchon != null) {
+            if (rc.getLocation().distanceSquaredTo(closestArchon) > 20) {
+                tryMoveTo(closestArchon);
+            } else {
+                tryMoveRandom();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    protected MapLocation getClosestArchon() throws GameActionException {
         MapLocation myLocation = rc.getLocation();
 
-        MapLocation bestArchon = null;
+        MapLocation closestArchon = null;
         int minDistance = Integer.MAX_VALUE;
 
         for (int i = 0; i < 5; i++) {
@@ -428,19 +444,11 @@ public abstract class Robot {
 
             int distance = myLocation.distanceSquaredTo(archon);
             if (distance < minDistance) {
-                bestArchon = archon;
+                closestArchon = archon;
                 minDistance = distance;
             }
         }
 
-        if (bestArchon != null) {
-            if (minDistance > 20) {
-                tryMoveTo(bestArchon);
-            } else {
-                tryMoveRandom();
-            }
-        }
-
-        return false;
+        return closestArchon;
     }
 }

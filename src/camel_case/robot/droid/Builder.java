@@ -23,16 +23,10 @@ public class Builder extends Droid {
         lookForDangerTargets();
 
         if (archonLocation == null) {
-            for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, myTeam)) {
-                if (robot.type == RobotType.ARCHON) {
-                    archonLocation = robot.location;
-                }
+            archonLocation = getClosestArchon();
+            if (archonLocation == null) {
+                return;
             }
-        }
-
-        if (archonLocation == null) {
-            tryWander();
-            return;
         }
 
         for (Direction direction : adjacentDirections) {

@@ -49,8 +49,9 @@ def run_matches(bot1, bot2, maps, timestamp):
             total_matches = len(maps) * 2
             prefix = f"[{str(current_match).rjust(len(str(total_matches)))}/{total_matches}]"
 
-            print(f"{prefix} {result_match[1]} wins in {result_match[2]} rounds in {bot1} (red) versus {bot2} (blue) on {current_map}")
+            winner_color = "red" if result_match[1] == bot1 else "blue"
 
+            print(f"{prefix} {result_match[1]} wins in {result_match[2]} rounds as {winner_color} on {current_map}")
             winners_by_map[current_map] = result_match[1]
 
     if proc.wait() != 0:

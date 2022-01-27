@@ -12,8 +12,6 @@ import camel_case.util.BattlecodeFunction;
 import java.util.Arrays;
 
 public class Miner extends Droid {
-    private MapLocation archonLocation = null;
-
     public Miner(RobotController rc) {
         super(rc, RobotType.MINER, new Dijkstra20(rc));
     }
@@ -24,26 +22,10 @@ public class Miner extends Droid {
 
         lookForDangerTargets();
 
-        if (archonLocation == null) {
-            for (RobotInfo robot : rc.senseNearbyRobots(me.visionRadiusSquared, myTeam)) {
-                if (robot.type == RobotType.ARCHON) {
-                    archonLocation = robot.location;
-                    break;
-                }
-            }
-        }
-
-        MapLocation myLocation = rc.getLocation();
-        if (archonLocation != null && myLocation.isAdjacentTo(archonLocation)) {
-            for (Direction direction : adjacentDirections) {
-                if (!rc.adjacentLocation(direction).isAdjacentTo(archonLocation) && tryMove(direction)) {
-                    break;
-                }
-            }
-        }
-
         RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
-        if (visibleTarget != null && visibleTarget.type.canAttack()) {
+        if (visibleTarget != null
+                && visibleTarget.type.canAttack()
+                && rc.getHealth() != me.getMaxHealth(rc.getLevel())) {
             tryMoveToSafety();
             tryMineLeadAllDirections();
             return;
@@ -140,7 +122,7 @@ public class Miner extends Droid {
         }
 
         if (bestOption != null) {
-            if (archonLocation == null || !bestOption.isAdjacentTo(archonLocation) || !myLocation.isAdjacentTo(bestOption)) {
+            if (!myLocation.isAdjacentTo(bestOption)) {
                 tryMoveTo(bestOption);
             }
 

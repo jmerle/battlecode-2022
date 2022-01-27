@@ -24,7 +24,10 @@ public class Soldier extends Droid {
         }
 
         RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
-        if (visibleTarget != null && visibleTarget.type.canAttack() && !rc.isActionReady()) {
+        if (visibleTarget != null
+                && visibleTarget.type.canAttack()
+                && !rc.isActionReady()
+                && rc.getHealth() != me.getMaxHealth(rc.getLevel())) {
             tryMoveToSafety();
             return;
         }

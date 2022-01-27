@@ -1,10 +1,13 @@
 package camel_case.robot.building;
 
+import battlecode.common.AnomalyScheduleEntry;
+import battlecode.common.AnomalyType;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
+import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra34;
 import camel_case.util.RandomUtils;
@@ -14,6 +17,11 @@ public class Archon extends Building {
     private Direction[] spawnDirections;
 
     private boolean isFirstRun = true;
+
+    private MapLocation optimalLocation = null;
+    private boolean hasFoundInitialOptimalLocation = false;
+
+    private AnomalyScheduleEntry[] anomalySchedule;
 
     private int minersSpawned = 0;
     private int maxLeadingMiners;
@@ -66,6 +74,29 @@ public class Archon extends Building {
 
         lookForDangerTargets();
 
+        if (rc.getMode() == RobotMode.PORTABLE) {
+            if (getAttackTarget(me.visionRadiusSquared) != null) {
+                tryTransform();
+            } else {
+                tryMoveToOptimalLocation();
+            }
+
+            return;
+        }
+
+        boolean checkForInitialOptimalLocation = false;
+        if (!hasFoundInitialOptimalLocation) {
+            int currentRound = rc.getRoundNum();
+            if (currentRound == 150 || (currentRound == 10 && rc.senseRubble(rc.getLocation()) >= 30)) {
+                checkForInitialOptimalLocation = true;
+                hasFoundInitialOptimalLocation = true;
+            }
+        }
+
+        if (checkForInitialOptimalLocation || vortexHappened()) {
+            findOptimalLocation();
+        }
+
         if (getAttackTarget(me.visionRadiusSquared) != null) {
             tryBuildRobot(RobotType.SOLDIER);
             tryRepair();
@@ -73,6 +104,7 @@ public class Archon extends Building {
         }
 
         if (!RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+            tryMoveToOptimalLocation();
             tryRepair();
             return;
         }
@@ -104,6 +136,7 @@ public class Archon extends Building {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         }
 
+        tryMoveToOptimalLocation();
         tryRepair();
     }
 
@@ -193,5 +226,108 @@ public class Archon extends Building {
                 && rc.canRepair(repairTarget.location)) {
             rc.repair(repairTarget.location);
         }
+    }
+
+    private void findOptimalLocation() throws GameActionException {
+        MapLocation myLocation = rc.getLocation();
+
+        int minArchonRubble = rc.senseRubble(myLocation);
+        double minSpawnRubble = getSpawnRubble(myLocation);
+        int minDistance = 0;
+
+        for (MapLocation location : rc.getAllLocationsWithinRadiusSquared(rc.getLocation(), 20)) {
+            int archonRubble = rc.senseRubble(location);
+            if (archonRubble > minArchonRubble) {
+                continue;
+            }
+
+            if (myLocation.equals(location) || rc.senseRobotAtLocation(location) != null) {
+                continue;
+            }
+
+            double spawnRubble = getSpawnRubble(location);
+            int distance = myLocation.distanceSquaredTo(location);
+
+            if (archonRubble < minArchonRubble
+                    || spawnRubble < minSpawnRubble
+                    || (spawnRubble == minSpawnRubble && distance < minDistance)) {
+                optimalLocation = location;
+                minArchonRubble = archonRubble;
+                minSpawnRubble = spawnRubble;
+                minDistance = distance;
+            }
+        }
+    }
+
+    private boolean vortexHappened() {
+        if (anomalySchedule == null) {
+            anomalySchedule = rc.getAnomalySchedule();
+        }
+
+        int round = rc.getRoundNum() - 1;
+        for (AnomalyScheduleEntry entry : anomalySchedule) {
+            if (entry.roundNumber == round && entry.anomalyType == AnomalyType.VORTEX) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void tryMoveToOptimalLocation() throws GameActionException {
+        if (optimalLocation == null) {
+            return;
+        }
+
+        if (rc.getLocation().equals(optimalLocation)) {
+            if (rc.getMode() == RobotMode.PORTABLE) {
+                tryTransform();
+            }
+        } else {
+            if (rc.getMode() == RobotMode.PORTABLE) {
+                tryMoveTo(optimalLocation);
+                sharedArray.setMyArchonLocation(sharedArray.archonIdToIndex(rc.getID()), rc.getLocation());
+            } else {
+                tryTransform();
+            }
+        }
+    }
+
+    private double getSpawnRubble(MapLocation location) throws GameActionException {
+        double score = 0.0;
+
+        MapLocation center = new MapLocation(mapWidth / 2, mapHeight / 2);
+        Direction optimalDirection = location.directionTo(center);
+
+        MapLocation optimalLocation = location.add(optimalDirection);
+        if (rc.onTheMap(optimalLocation)) {
+            score += rc.senseRubble(optimalLocation);
+        }
+
+        Direction left = optimalDirection;
+        Direction right = optimalDirection;
+
+        for (int i = 0; i < 3; i++) {
+            left = left.rotateLeft();
+            right = right.rotateRight();
+
+            MapLocation locationLeft = location.add(left);
+            if (rc.onTheMap(locationLeft)) {
+                score += (double) (i + 2) * rc.senseRubble(locationLeft);
+            }
+
+            MapLocation locationRight = location.add(right);
+            if (rc.onTheMap(locationRight)) {
+                score += (double) (i + 2) * rc.senseRubble(locationRight);
+            }
+        }
+
+
+        MapLocation oppositeLocation = location.add(optimalDirection.opposite());
+        if (rc.onTheMap(oppositeLocation)) {
+            score += 5.0 * rc.senseRubble(oppositeLocation);
+        }
+
+        return score;
     }
 }

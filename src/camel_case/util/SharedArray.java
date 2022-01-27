@@ -52,18 +52,18 @@ public class SharedArray {
 
     public MapLocation getDangerTarget(int index) throws GameActionException {
         int value = rc.readSharedArray(index + 26);
-        return value > 0 ? intToLocation(value % 10_000) : null;
+        return value > 0 ? intToLocation(value % 5_000) : null;
     }
 
-    public void setDangerTarget(int index, MapLocation location) throws GameActionException {
-        write(index + 26, locationToInt(location) + 10_000);
+    public void setDangerTarget(int index, MapLocation location, int expiration) throws GameActionException {
+        write(index + 26, locationToInt(location) + expiration * 5_000);
     }
 
     public void expireDangerTargets() throws GameActionException {
         for (int i = 0; i < MAX_DANGER_TARGETS; i++) {
             int value = rc.readSharedArray(i + 26);
-            if (value > 10_000) {
-                write(i + 26, value - 10_000);
+            if (value > 5_000) {
+                write(i + 26, value - 5_000);
             } else if (value > 0) {
                 write(i + 26, 0);
             }

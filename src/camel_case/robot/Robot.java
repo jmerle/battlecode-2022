@@ -215,7 +215,7 @@ public abstract class Robot {
 
         int enemyCount = 0;
 
-        MapLocation closestTarget = null;
+        RobotInfo closestTarget = null;
         int minDistance = Integer.MAX_VALUE;
 
         for (RobotInfo robot : nearbyRobots) {
@@ -227,7 +227,7 @@ public abstract class Robot {
 
             int distance = myLocation.distanceSquaredTo(robot.location);
             if (distance < minDistance) {
-                closestTarget = robot.location;
+                closestTarget = robot;
                 minDistance = distance;
             }
         }
@@ -240,7 +240,7 @@ public abstract class Robot {
         for (RobotInfo robot : nearbyRobots) {
             if (robot.team == myTeam
                     && robot.type.canAttack()
-                    && robot.location.distanceSquaredTo(closestTarget) <= robot.type.actionRadiusSquared) {
+                    && robot.location.distanceSquaredTo(closestTarget.location) <= robot.type.actionRadiusSquared) {
                 defenderCount++;
             }
         }
@@ -248,8 +248,9 @@ public abstract class Robot {
         if (enemyCount > defenderCount) {
             for (int i = 0; i < SharedArray.MAX_DANGER_TARGETS; i++) {
                 MapLocation dangerTarget = sharedArray.getDangerTarget(i);
-                if (dangerTarget == null || dangerTarget.equals(closestTarget)) {
-                    sharedArray.setDangerTarget(i, closestTarget);
+                if (dangerTarget == null || dangerTarget.equals(closestTarget.location)) {
+                    int expiration = closestTarget.type == RobotType.SAGE ? 10 : 1;
+                    sharedArray.setDangerTarget(i, closestTarget.location, expiration);
                     break;
                 }
             }

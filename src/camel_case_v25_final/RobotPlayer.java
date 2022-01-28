@@ -1,15 +1,15 @@
-package camel_case_v25;
+package camel_case_v25_final;
 
 import battlecode.common.Clock;
 import battlecode.common.RobotController;
-import camel_case_v25.robot.Robot;
-import camel_case_v25.robot.building.Archon;
-import camel_case_v25.robot.building.Laboratory;
-import camel_case_v25.robot.building.Watchtower;
-import camel_case_v25.robot.droid.Builder;
-import camel_case_v25.robot.droid.Miner;
-import camel_case_v25.robot.droid.Sage;
-import camel_case_v25.robot.droid.Soldier;
+import camel_case_v25_final.robot.Robot;
+import camel_case_v25_final.robot.building.Archon;
+import camel_case_v25_final.robot.building.Laboratory;
+import camel_case_v25_final.robot.building.Watchtower;
+import camel_case_v25_final.robot.droid.Builder;
+import camel_case_v25_final.robot.droid.Miner;
+import camel_case_v25_final.robot.droid.Sage;
+import camel_case_v25_final.robot.droid.Soldier;
 
 @SuppressWarnings("unused")
 public class RobotPlayer {

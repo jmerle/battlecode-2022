@@ -1,4 +1,4 @@
-package camel_case_v25.util;
+package camel_case_v25_final.util;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;

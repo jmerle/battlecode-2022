@@ -1,4 +1,4 @@
-package camel_case_v25.robot.building;
+package camel_case_v25_final.robot.building;
 
 import battlecode.common.AnomalyScheduleEntry;
 import battlecode.common.AnomalyType;
@@ -9,9 +9,9 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
-import camel_case_v25.dijkstra.Dijkstra34;
-import camel_case_v25.util.RandomUtils;
-import camel_case_v25.util.SharedArray;
+import camel_case_v25_final.dijkstra.Dijkstra34;
+import camel_case_v25_final.util.RandomUtils;
+import camel_case_v25_final.util.SharedArray;
 
 public class Archon extends Building {
     private Direction[] spawnDirections;

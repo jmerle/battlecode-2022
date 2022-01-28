@@ -1,4 +1,4 @@
-package camel_case_v25.util;
+package camel_case_v25_final.util;
 
 public class RandomUtils {
     public static int nextInt(int maxExclusive) {

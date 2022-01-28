@@ -1,4 +1,4 @@
-package camel_case_v25.robot;
+package camel_case_v25_final.robot;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -7,10 +7,10 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Team;
-import camel_case_v25.dijkstra.Dijkstra;
-import camel_case_v25.util.ArrayUtils;
-import camel_case_v25.util.RandomUtils;
-import camel_case_v25.util.SharedArray;
+import camel_case_v25_final.dijkstra.Dijkstra;
+import camel_case_v25_final.util.ArrayUtils;
+import camel_case_v25_final.util.RandomUtils;
+import camel_case_v25_final.util.SharedArray;
 
 public abstract class Robot {
     protected RobotController rc;

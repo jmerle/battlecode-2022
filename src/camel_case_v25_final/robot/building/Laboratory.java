@@ -1,9 +1,9 @@
-package camel_case_v25.robot.building;
+package camel_case_v25_final.robot.building;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
 import battlecode.common.RobotType;
-import camel_case_v25.dijkstra.Dijkstra53;
+import camel_case_v25_final.dijkstra.Dijkstra53;
 
 public class Laboratory extends Building {
     public Laboratory(RobotController rc) {

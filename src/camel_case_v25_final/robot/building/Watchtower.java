@@ -1,4 +1,4 @@
-package camel_case_v25.robot.building;
+package camel_case_v25_final.robot.building;
 
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -6,7 +6,7 @@ import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotMode;
 import battlecode.common.RobotType;
-import camel_case_v25.dijkstra.Dijkstra34;
+import camel_case_v25_final.dijkstra.Dijkstra34;
 
 public class Watchtower extends Building {
     public Watchtower(RobotController rc) {

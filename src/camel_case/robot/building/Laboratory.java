@@ -13,5 +13,9 @@ public class Laboratory extends Building {
     @Override
     public void run() throws GameActionException {
         super.run();
+
+        if (!sharedArray.builderNeedsResources() && rc.canTransmute()) {
+            rc.transmute();
+        }
     }
 }

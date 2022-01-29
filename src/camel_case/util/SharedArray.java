@@ -80,6 +80,50 @@ public class SharedArray {
         }
     }
 
+    public void markLaboratoryBuilderAlive() throws GameActionException {
+        write(26 + MAX_DANGER_TARGETS + 1, rc.getRoundNum());
+    }
+
+    public boolean laboratoryBuilderAlive() throws GameActionException {
+        int value = rc.readSharedArray(26 + MAX_DANGER_TARGETS + 1);
+        return value > 0 && rc.getRoundNum() - value <= 1;
+    }
+
+    public void markBuilderNeedsResources() throws GameActionException {
+        write(26 + MAX_DANGER_TARGETS + 2, rc.getRoundNum());
+    }
+
+    public boolean builderNeedsResources() throws GameActionException {
+        int value = rc.readSharedArray(26 + MAX_DANGER_TARGETS + 2);
+        return value > 0 && rc.getRoundNum() - value <= 1;
+    }
+
+    public void markMinerAlive() throws GameActionException {
+        int minIndex = 0;
+        int minValue = Integer.MAX_VALUE;
+
+        for (int i = 1; i <= 5; i++) {
+            int value = rc.readSharedArray(26 + MAX_DANGER_TARGETS + 2 + i);
+            if (value < minValue) {
+                minIndex = i;
+                minValue = value;
+            }
+        }
+
+        write(26 + MAX_DANGER_TARGETS + 2 + minIndex, rc.getRoundNum());
+    }
+
+    public boolean needMiners() throws GameActionException {
+        for (int i = 1; i <= 5; i++) {
+            int value = rc.readSharedArray(26 + MAX_DANGER_TARGETS + 2 + i);
+            if (value == 0 || rc.getRoundNum() - value > 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public int archonIdToIndex(int id) {
         return id % 2 == 0 ? id / 2 : (id - 1) / 2;
     }

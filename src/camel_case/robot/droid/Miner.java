@@ -22,6 +22,8 @@ public class Miner extends Droid {
 
         lookForDangerTargets();
 
+        sharedArray.markMinerAlive();
+
         RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
         if (visibleTarget != null
                 && visibleTarget.type.canAttack()

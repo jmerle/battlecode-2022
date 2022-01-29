@@ -27,11 +27,10 @@ public class Archon extends Building {
     private int maxLeadingMiners;
 
     private RobotType[] spawnOrder = {
+            RobotType.BUILDER,
             RobotType.SOLDIER,
             RobotType.SOLDIER,
-            RobotType.SOLDIER,
-            RobotType.MINER,
-            RobotType.BUILDER
+            RobotType.MINER
     };
 
     private int spawnOrderIndex = 0;
@@ -97,13 +96,30 @@ public class Archon extends Building {
             findOptimalLocation();
         }
 
-        if (getAttackTarget(me.visionRadiusSquared) != null) {
+        RobotInfo attackTarget = getAttackTarget(me.visionRadiusSquared);
+        if (attackTarget != null && attackTarget.type.canAttack()) {
             tryBuildRobot(RobotType.SOLDIER);
+            tryBuildRobot(RobotType.SAGE);
+            tryRepair();
+            return;
+        }
+
+        if (sharedArray.builderNeedsResources()) {
+            tryBuildRobot(RobotType.SAGE);
+            tryMoveToOptimalLocation();
+            tryRepair();
+            return;
+        }
+
+        if (sharedArray.laboratoryBuilderAlive() && sharedArray.needMiners()) {
+            tryBuildRobot(RobotType.MINER);
+            tryMoveToOptimalLocation();
             tryRepair();
             return;
         }
 
         if (rc.getRoundNum() > 1 && !RandomUtils.chance(((double) turnIndex + 1) / (double) archonCount)) {
+            tryBuildRobot(RobotType.SAGE);
             tryMoveToOptimalLocation();
             tryRepair();
             return;
@@ -122,20 +138,20 @@ public class Archon extends Building {
                 minersSpawned++;
             }
 
+            tryBuildRobot(RobotType.SAGE);
             tryRepair();
             return;
         }
 
-        if (rc.getTeamLeadAmount(myTeam) < 300) {
-            while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER) {
-                spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
-            }
+        while (spawnOrder[spawnOrderIndex] == RobotType.BUILDER && (turnIndex != 0 || sharedArray.laboratoryBuilderAlive())) {
+            spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         }
 
         if (tryBuildRobot(spawnOrder[spawnOrderIndex])) {
             spawnOrderIndex = (spawnOrderIndex + 1) % spawnOrder.length;
         }
 
+        tryBuildRobot(RobotType.SAGE);
         tryMoveToOptimalLocation();
         tryRepair();
     }
@@ -207,7 +223,7 @@ public class Archon extends Building {
             }
         }
 
-        if (bestDirection != null) {
+        if (bestDirection != null && rc.canBuildRobot(type, bestDirection)) {
             rc.buildRobot(type, bestDirection);
             return true;
         }
@@ -220,11 +236,25 @@ public class Archon extends Building {
             return;
         }
 
-        RobotInfo repairTarget = getRepairTarget(me.actionRadiusSquared);
-        if (repairTarget != null
-                && repairTarget.health < repairTarget.type.getMaxHealth(repairTarget.level)
-                && rc.canRepair(repairTarget.location)) {
-            rc.repair(repairTarget.location);
+        RobotInfo bestTarget = null;
+        int minHealth = Integer.MAX_VALUE;
+
+        for (RobotInfo robot : rc.senseNearbyRobots(me.actionRadiusSquared, myTeam)) {
+            if (!rc.canRepair(robot.location)
+                    || robot.type.isBuilding()
+                    || !robot.type.canAttack()
+                    || robot.health == robot.type.getMaxHealth(robot.level)) {
+                continue;
+            }
+
+            if (robot.health < minHealth) {
+                bestTarget = robot;
+                minHealth = robot.health;
+            }
+        }
+
+        if (bestTarget != null && rc.canRepair(bestTarget.location)) {
+            rc.repair(bestTarget.location);
         }
     }
 

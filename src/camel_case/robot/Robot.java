@@ -1,5 +1,6 @@
 package camel_case.robot;
 
+import battlecode.common.AnomalyType;
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
 import battlecode.common.MapLocation;
@@ -107,14 +108,32 @@ public abstract class Robot {
                 }
             }
 
-            if (rc.canAttack(robot.location)) {
-                rc.attack(robot.location);
+            boolean didAttack = false;
 
-                if (robot.type == RobotType.ARCHON) {
-                    RobotInfo newRobot = rc.senseRobotAtLocation(robot.location);
-                    if (newRobot == null || newRobot.team == myTeam || newRobot.type != RobotType.ARCHON) {
-                        sharedArray.setEnemyArchonLocation(sharedArray.archonIdToIndex(robot.ID), null);
+            if (rc.canEnvision(AnomalyType.CHARGE)) {
+                int chargeDamage = 0;
+
+                for (RobotInfo enemyRobot : rc.senseNearbyRobots(me.actionRadiusSquared, enemyTeam)) {
+                    if (!enemyRobot.type.isBuilding()) {
+                        chargeDamage += Math.min(enemyRobot.health, Math.floor((double) enemyRobot.type.getMaxHealth(enemyRobot.level) / 100.0 * 22.0));
                     }
+                }
+
+                if (chargeDamage > me.damage) {
+                    rc.envision(AnomalyType.CHARGE);
+                    didAttack = true;
+                }
+            }
+
+            if (!didAttack && rc.canAttack(robot.location)) {
+                rc.attack(robot.location);
+                didAttack = true;
+            }
+
+            if (didAttack && robot.type == RobotType.ARCHON) {
+                RobotInfo newRobot = rc.senseRobotAtLocation(robot.location);
+                if (newRobot == null || newRobot.team == myTeam || newRobot.type != RobotType.ARCHON) {
+                    sharedArray.setEnemyArchonLocation(sharedArray.archonIdToIndex(robot.ID), null);
                 }
             }
 
@@ -129,19 +148,11 @@ public abstract class Robot {
     }
 
     protected RobotInfo getAttackTarget(int radius) {
-        return getAttackTarget(radius, enemyTeam);
-    }
-
-    protected RobotInfo getRepairTarget(int radius) {
-        return getAttackTarget(radius, myTeam);
-    }
-
-    private RobotInfo getAttackTarget(int radius, Team targetTeam) {
         RobotInfo bestTarget = null;
         int minHealth = Integer.MAX_VALUE;
         int maxPriority = Integer.MIN_VALUE;
 
-        for (RobotInfo robot : rc.senseNearbyRobots(radius, targetTeam)) {
+        for (RobotInfo robot : rc.senseNearbyRobots(radius, enemyTeam)) {
             int priority = attackPriorities[robot.type.ordinal()];
             if (bestTarget == null
                     || priority > maxPriority
@@ -463,5 +474,22 @@ public abstract class Robot {
         }
 
         return closestArchon;
+    }
+
+    protected boolean tryMoveToAndAttack(MapLocation location) throws GameActionException {
+        if (location == null) {
+            return false;
+        }
+
+        tryMoveTo(location);
+
+        if (rc.canSenseLocation(location)) {
+            RobotInfo robot = rc.senseRobotAtLocation(location);
+            if (robot != null) {
+                tryAttack(robot);
+            }
+        }
+
+        return true;
     }
 }

@@ -2,6 +2,7 @@ package camel_case.robot.droid;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import camel_case.dijkstra.Dijkstra20;
 
@@ -14,6 +15,35 @@ public class Sage extends Droid {
     public void run() throws GameActionException {
         super.run();
 
-        tryMoveRandom();
+        lookForDangerTargets();
+
+        RobotInfo visibleTarget = getAttackTarget(me.visionRadiusSquared);
+        if (visibleTarget != null && visibleTarget.type.canAttack() && !rc.isActionReady()) {
+            tryMoveToSafety();
+        }
+
+        RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
+        if (attackTarget != null) {
+            tryAttack(attackTarget);
+            return;
+        }
+
+        if (visibleTarget != null && tryMoveToAndAttack(visibleTarget.location)) {
+            return;
+        }
+
+        if (tryMoveToAndAttack(getClosestDangerTarget())) {
+            return;
+        }
+
+        if (tryMoveToAndAttack(getArchonTarget())) {
+            return;
+        }
+
+        if (tryMoveToAndAttack(getPossibleArchonTarget())) {
+            return;
+        }
+
+        tryWander();
     }
 }

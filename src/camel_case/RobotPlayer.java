@@ -22,12 +22,13 @@ public class RobotPlayer {
 
         // noinspection InfiniteLoopStatement
         while (true) {
-            performTurn(rc, robot);
-            Clock.yield();
+            if (performTurn(rc, robot)) {
+                Clock.yield();
+            }
         }
     }
 
-    private static void performTurn(RobotController rc, Robot robot) {
+    private static boolean performTurn(RobotController rc, Robot robot) {
         int startRound = rc.getRoundNum();
 
         try {
@@ -44,6 +45,8 @@ public class RobotPlayer {
             String format = "High bytecode usage!\n%s/%s (%s%%)\n";
             System.out.printf(format, usedBytecodes, maxBytecodes, (int) Math.round(bytecodePercentage));
         }
+
+        return bytecodePercentage < 100;
     }
 
     private static Robot createRobot(RobotController rc) {

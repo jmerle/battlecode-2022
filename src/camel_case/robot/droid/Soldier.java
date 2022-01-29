@@ -29,7 +29,6 @@ public class Soldier extends Droid {
                 && !rc.isActionReady()
                 && rc.getHealth() != me.getMaxHealth(rc.getLevel())) {
             tryMoveToSafety();
-            return;
         }
 
         RobotInfo attackTarget = getAttackTarget(me.actionRadiusSquared);
@@ -57,40 +56,8 @@ public class Soldier extends Droid {
         tryWander();
     }
 
-    private boolean tryMoveToAndAttack(MapLocation location) throws GameActionException {
-        if (location == null) {
-            return false;
-        }
-
-        tryMoveTo(location);
-
-        if (rc.canSenseLocation(location)) {
-            RobotInfo robot = rc.senseRobotAtLocation(location);
-            if (robot != null) {
-                tryAttack(robot);
-            }
-        }
-
-        return true;
-    }
-
     private int distanceToArchon() throws GameActionException {
-        MapLocation myLocation = rc.getLocation();
-
-        int minDistance = Integer.MAX_VALUE;
-
-        for (int i = 0; i < 5; i++) {
-            MapLocation archon = sharedArray.getMyArchonLocation(i);
-            if (archon == null) {
-                continue;
-            }
-
-            int distance = myLocation.distanceSquaredTo(archon);
-            if (distance < minDistance) {
-                minDistance = distance;
-            }
-        }
-
-        return minDistance;
+        MapLocation archon = getClosestArchon();
+        return archon != null ? rc.getLocation().distanceSquaredTo(archon) : Integer.MAX_VALUE;
     }
 }
